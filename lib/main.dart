@@ -4,36 +4,72 @@ import 'screens/tab2.dart';
 import 'screens/tab3.dart';
 
 void main() {
-  runApp(const TabBarDemo());
+  runApp(MyApp());
 }
 
-class TabBarDemo extends StatelessWidget {
-  const TabBarDemo({Key? key}) : super(key: key);
-
+class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: DefaultTabController(
-        length: 3,
-        child: Scaffold(
-          appBar: AppBar(
-            bottom: const TabBar(
-              tabs: [
-                Tab(icon: Icon(Icons.directions_car)),
-                Tab(icon: Icon(Icons.directions_transit)),
-                Tab(icon: Icon(Icons.directions_bike)),
-              ],
-            ),
-            title: const Text('ShowFOX🦊'),
-          ),
-          body: const TabBarView(
-            children: [
-              MusicalTab(),
-              TransitTab(),
-              BikeTab(),
-            ],
-          ),
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(scaffoldBackgroundColor: Colors.white),
+      home: HomePage(),
+    );
+  }
+}
+
+class HomePage extends StatefulWidget {
+  @override
+  _HomePageState createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  int _currentIndex = 0;
+
+  // 각 탭의 화면
+  final List<Widget> _tabs = [
+    Tab1(), // tab1.dart의 클래스
+    Tab2(), // tab2.dart의 클래스
+    Tab3(), // tab3.dart의 클래스
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          "🦊ShowFOX",
+          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
+        backgroundColor: Colors.orangeAccent
+      ),
+      body: _tabs[_currentIndex],
+      bottomNavigationBar: BottomNavigationBar(
+        backgroundColor: Colors.orangeAccent,
+        currentIndex: _currentIndex,
+        onTap: (index) {
+          setState(() {
+            _currentIndex = index;
+          });
+        },
+        unselectedItemColor: Colors.white,
+        selectedItemColor: Colors.deepOrange,
+        // unselectedIconTheme: IconThemeData(color: Colors.white),
+        // selectedIconTheme: IconThemeData(color: Colors.deepOrange),
+        items: [
+          BottomNavigationBarItem(
+              icon: Icon(Icons.list),
+              label: "Musicals"
+          ),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.person),
+              label: "Actors"
+          ),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.calendar_month),
+              label: "Schedules"
+          ),
+        ],
       ),
     );
   }
