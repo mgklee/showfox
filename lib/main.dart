@@ -11,6 +11,8 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(scaffoldBackgroundColor: Colors.white),
       home: HomePage(),
     );
   }
@@ -34,19 +36,26 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Tab Example")),
+      appBar: AppBar(
+          title: Text("ShowFOX🦊"), backgroundColor: Colors.orangeAccent),
       body: _tabs[_currentIndex],
       bottomNavigationBar: BottomNavigationBar(
+        backgroundColor: Colors.orangeAccent,
         currentIndex: _currentIndex,
         onTap: (index) {
           setState(() {
             _currentIndex = index;
           });
         },
+        unselectedItemColor: Colors.white,
+        selectedItemColor: Colors.deepOrange,
+        // unselectedIconTheme: IconThemeData(color: Colors.white),
+        // selectedIconTheme: IconThemeData(color: Colors.deepOrange),
         items: [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: "Tab 1"),
-          BottomNavigationBarItem(icon: Icon(Icons.search), label: "Tab 2"),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: "Tab 3"),
+          BottomNavigationBarItem(icon: Icon(Icons.list), label: "musicals"),
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: "actors"),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.calendar_month), label: "schedules"),
         ],
       ),
     );
