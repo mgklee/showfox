@@ -37,7 +37,7 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-          title: Text("ShowFOX🦊"), backgroundColor: Colors.orangeAccent),
+          title: Text("🦊ShowFOX"), backgroundColor: Colors.orangeAccent),
       body: _tabs[_currentIndex],
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: Colors.orangeAccent,
