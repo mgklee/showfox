@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
+import 'screens/tab1.dart';
+import 'screens/tab2.dart';
+import 'screens/tab3.dart';
 
 void main() {
   runApp(const TabBarDemo());
 }
 
 class TabBarDemo extends StatelessWidget {
-  const TabBarDemo({super.key});
+  const TabBarDemo({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -25,9 +28,9 @@ class TabBarDemo extends StatelessWidget {
           ),
           body: const TabBarView(
             children: [
-              Icon(Icons.directions_car),
-              Icon(Icons.directions_transit),
-              Icon(Icons.directions_bike),
+              MusicalTab(),
+              TransitTab(),
+              BikeTab(),
             ],
           ),
         ),
