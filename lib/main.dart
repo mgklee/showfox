@@ -37,7 +37,12 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-          title: Text("🦊ShowFOX"), backgroundColor: Colors.orangeAccent),
+        title: Text(
+          "🦊ShowFOX",
+          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        ),
+        backgroundColor: Colors.orangeAccent
+      ),
       body: _tabs[_currentIndex],
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: Colors.orangeAccent,
@@ -52,10 +57,18 @@ class _HomePageState extends State<HomePage> {
         // unselectedIconTheme: IconThemeData(color: Colors.white),
         // selectedIconTheme: IconThemeData(color: Colors.deepOrange),
         items: [
-          BottomNavigationBarItem(icon: Icon(Icons.list), label: "musicals"),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: "actors"),
           BottomNavigationBarItem(
-              icon: Icon(Icons.calendar_month), label: "schedules"),
+              icon: Icon(Icons.list),
+              label: "Musicals"
+          ),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.person),
+              label: "Actors"
+          ),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.calendar_month),
+              label: "Schedules"
+          ),
         ],
       ),
     );
