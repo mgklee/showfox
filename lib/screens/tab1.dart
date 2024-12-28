@@ -141,9 +141,9 @@ class _MusicalTabState extends State<Tab1> {
                               children: [
                                 Image.network(
                                   musical.thumbnail,
-                                  fit: BoxFit.contain,
-                                  height: 350, // Fixed height for the image
                                   width: double.infinity,
+                                  height: 350, // Fixed height for the image
+                                  fit: BoxFit.contain,
                                 ),
                                 Positioned(
                                   top: 8,
