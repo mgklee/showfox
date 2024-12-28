@@ -100,4 +100,4 @@ flutter:
   # see https://flutter.dev/custom-fonts/#from-packages
 flutter_native_splash:
   color: "#ffffff"
-  image: assets/images/splash.jpg
+  image: assets/images/splash3.jpg
