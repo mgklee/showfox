@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -25,6 +26,77 @@ class _MusicalTabState extends State<Tab1> {
   void initState() {
     super.initState();
     musicals = loadMusicalData();
+  }
+
+  Widget _buildDetailRow(String label, String value) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(
+          width: 80,
+          child: Text(
+            label,
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
+        ),
+        Flexible(
+          child: Text(value),
+        ),
+      ],
+    );
+  }
+
+  void _showMusicalDetails(BuildContext context, Musical musical) {
+    final NumberFormat currencyFormat = NumberFormat("#,###");
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(
+            "${musical.title} 상세정보",
+            style: const TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold
+            ),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildDetailRow("장소", musical.place),
+              _buildDetailRow("공연기간", "${musical.firstDate} ~ ${musical.lastDate}"),
+              _buildDetailRow("공연시간", "${musical.duration}분 (인터미션 20분 포함)"),
+              _buildDetailRow("관람연령", "${musical.ageLimit}세 이상 관람가능"),
+              _buildDetailRow("가격", "${currencyFormat.format(musical.minPrice)} ~ ${currencyFormat.format(musical.maxPrice)}원"),
+              _buildDetailRow("캐스팅", musical.actors),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+              },
+              child: const Text('닫기'),
+            ),
+            TextButton(
+              onPressed: () {
+                _launchURL(musical.map);
+                Navigator.of(context).pop();
+              },
+              child: const Text('지도 보기'),
+            ),
+            TextButton(
+              onPressed: () {
+                _launchURL(musical.url); // Open the musical's URL
+                Navigator.of(context).pop();
+              },
+              child: const Text('예매하기'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -63,7 +135,7 @@ class _MusicalTabState extends State<Tab1> {
                         children: [
                           GestureDetector(
                             onTap: () {
-                              _launchURL(musical.url);
+                              _showMusicalDetails(context, musical);
                             },
                             child: Stack(
                               children: [
@@ -84,6 +156,19 @@ class _MusicalTabState extends State<Tab1> {
                                         } else {
                                           savedMusicals.add(musical.title);
                                         }
+
+                                        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          SnackBar(
+                                            width: 300,
+                                            content: Text(isSaved ? '저장됨' : '저장 해제됨'),
+                                            duration: const Duration(seconds: 1), // Short duration for quick response
+                                            behavior: SnackBarBehavior.floating, // Makes it appear above other content
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.circular(8),
+                                            ),
+                                          ),
+                                        );
                                       });
                                     },
                                     child: Icon(
@@ -105,17 +190,11 @@ class _MusicalTabState extends State<Tab1> {
                             ),
                           ),
                           const SizedBox(height: 5),
-                          GestureDetector(
-                            onTap: () {
-                              _launchURL(musical.map);
-                            },
-                            child: Text(
-                              musical.place,
-                              style: const TextStyle(fontSize: 15),
-                            ),
+                          Text(
+                            musical.place,
+                            style: const TextStyle(fontSize: 15),
                           ),
                           Text("${musical.firstDate} ~ ${musical.lastDate}"),
-                          Text("${musical.duration}분 | ${musical.ageLimit}세이상 관람가능"),
                         ],
                       ),
                     ),
