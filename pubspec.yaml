@@ -68,9 +68,20 @@ flutter:
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
   assets:
-    - assets/images/
-    - assets/musical.json
-    - assets/actor.json
+    - assets/
+    - assets/images/baekhyeonghun/
+    - assets/images/chajiyeon/
+    - assets/images/chohyungkyun/
+    - assets/images/hongkwangho/
+    - assets/images/kimjunsu/
+    - assets/images/kimsohyun/
+    - assets/images/michaellee/
+    - assets/images/okjoohyun/
+    - assets/images/parkeuntae/
+    - assets/images/parkjinjoo/
+    - assets/images/sonjunho/
+    - assets/images/yoondohyun/
+    - assets/images/yujunsang/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
@@ -100,4 +111,4 @@ flutter:
 
 flutter_native_splash:
   color: "#ffffff"
-  image: assets/images/splash.jpg
+  image: assets/images/splash/splash3.jpg

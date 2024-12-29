@@ -1,34 +1,34 @@
 class Actor {
   final String name;
+  final String code;
   final int debutYear;
+  final String debutWork;
   final String birthday;
   final String company;
   final String musicals;
-  final String picture1;
-  final String picture2;
-  final String picture3;
+  final String profilePicture;
 
   Actor({
     required this.name,
+    required this.code,
     required this.debutYear,
+    required this.debutWork,
     required this.birthday,
     required this.company,
     required this.musicals,
-    required this.picture1,
-    required this.picture2,
-    required this.picture3
+    required this.profilePicture,
   });
 
   factory Actor.fromJson(Map<String, dynamic> json) {
     return Actor(
       name: json['name'] as String,
+      code: json['code'] as String,
       debutYear: json['debutYear'] as int,
+      debutWork: json['debutWork'] as String,
       birthday: json['birthday'] as String,
       company: json['company'] as String,
       musicals: json['musicals'] as String,
-      picture1: json['picture1'] as String,
-      picture2: json['picture2'] as String,
-      picture3: json['picture3'] as String
+      profilePicture: json['profilePicture'] as String,
     );
   }
 }
