@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'screens/tab1.dart';
 import 'screens/tab2.dart';
 import 'screens/tab3.dart';
 
-void main() {
+void main() async {
+  await initializeDateFormatting();
   runApp(MyApp());
 }
 
