@@ -41,24 +41,26 @@ class _Tab3State extends State<Tab3> {
   }
 
   // Musical JSON read, add musical schedule to Event list
-  Future<void> makeEventFromMusical() async {
+  Future<void> makeEventFromSavedMusical() async {
     List<Musical>musicalsForEvent = await loadMusicalData();
     Map<DateTime, List<String>> newEvents = {};
 
-    for(var musical in musicalsForEvent){
-      DateTime startDate = changeStringToDateTime(musical.firstDate);
-      DateTime endDate = changeStringToDateTime(musical.lastDate);
-      String title = musical.title;
+    for(var musical in musicalsForEvent) {
+      if (savedMusicals.contains(musical.title)) {
+        DateTime startDate = changeStringToDateTime(musical.firstDate);
+        DateTime endDate = changeStringToDateTime(musical.lastDate);
+        String title = musical.title;
 
-      if (!newEvents.containsKey(startDate)) {
-        newEvents[startDate] = [];
-      }
-      newEvents[startDate]!.add("[" + title + "] 시작일");
+        if (!newEvents.containsKey(startDate)) {
+          newEvents[startDate] = [];
+        }
+        newEvents[startDate]!.add("[" + title + "] 시작일");
 
-      if (!newEvents.containsKey(endDate)) {
-        newEvents[endDate] = [];
+        if (!newEvents.containsKey(endDate)) {
+          newEvents[endDate] = [];
+        }
+        newEvents[endDate]!.add("[" + title + "] 마감일");
       }
-      newEvents[endDate]!.add("[" + title + "] 마감일");
     }
 
     setState(() {
@@ -67,13 +69,13 @@ class _Tab3State extends State<Tab3> {
   }
 
   @override
-  void initState() async {
+  void initState() {
     super.initState();
     _selectedDay = _focusedDay;
     _selectedEvents = ValueNotifier(_getEventsForDay(_selectedDay!));
     musicals = loadMusicalData();
-    makeEventFromMusical();
     getSavedMusicals();
+    makeEventFromSavedMusical();
   }
 
   @override
