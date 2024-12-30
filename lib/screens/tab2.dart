@@ -16,7 +16,7 @@ class _ActorTabState extends State<Tab2> {
   final Set<String> savedActors = {}; // To store the saved actor names
 
   Future<List<Actor>> loadActorData() async {
-    final String response = await rootBundle.loadString('assets/actor.json');
+      final String response = await rootBundle.loadString('assets/actor.json');
     final List<dynamic> data = json.decode(response);
     return data
         .map((item) => Actor.fromJson(item as Map<String, dynamic>))
