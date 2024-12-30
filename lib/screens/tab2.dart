@@ -18,7 +18,9 @@ class _ActorTabState extends State<Tab2> {
   Future<List<Actor>> loadActorData() async {
     final String response = await rootBundle.loadString('assets/actor.json');
     final List<dynamic> data = json.decode(response);
-    return data.map((item) => Actor.fromJson(item as Map<String, dynamic>)).toList();
+    return data
+        .map((item) => Actor.fromJson(item as Map<String, dynamic>))
+        .toList();
   }
 
   @override
@@ -64,13 +66,11 @@ class _ActorTabState extends State<Tab2> {
         return AlertDialog(
           title: Text(
             "${actor.name} 상세정보",
-            style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold
-            ),
+            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
           content: SizedBox(
-            width: MediaQuery.of(context).size.width * 0.8, // 80% of screen width
+            width:
+                MediaQuery.of(context).size.width * 0.8, // 80% of screen width
             child: SingleChildScrollView(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -95,7 +95,8 @@ class _ActorTabState extends State<Tab2> {
                   ),
                   const SizedBox(height: 20),
                   _buildDetailRow("생년월일", actor.birthday),
-                  _buildDetailRow("데뷔", "${actor.debutYear}년 ${actor.debutWork}"),
+                  _buildDetailRow(
+                      "데뷔", "${actor.debutYear}년 ${actor.debutWork}"),
                   _buildDetailRow("소속사", actor.company),
                   _buildDetailRow("작품", actor.musicals),
                 ],
@@ -149,7 +150,8 @@ class _ActorTabState extends State<Tab2> {
             itemCount: actorList.length,
             itemBuilder: (context, index) {
               final actor = actorList[index];
-              final isSaved = savedActors.contains(actor.name); // Check if it's saved
+              final isSaved =
+                  savedActors.contains(actor.name); // Check if it's saved
 
               return Column(
                 children: [
@@ -179,13 +181,17 @@ class _ActorTabState extends State<Tab2> {
                                   savedActors.add(actor.name);
                                 }
 
-                                ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                                ScaffoldMessenger.of(context)
+                                    .hideCurrentSnackBar();
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
                                     width: 300,
                                     content: Text(isSaved ? '저장됨' : '저장 해제됨'),
-                                    duration: const Duration(seconds: 1), // Short duration for quick response
-                                    behavior: SnackBarBehavior.floating, // Makes it appear above other content
+                                    duration: const Duration(
+                                        seconds:
+                                            1), // Short duration for quick response
+                                    behavior: SnackBarBehavior
+                                        .floating, // Makes it appear above other content
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(8),
                                     ),
@@ -207,9 +213,7 @@ class _ActorTabState extends State<Tab2> {
                   Text(
                     actor.name,
                     style: const TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold
-                    ),
+                        fontSize: 20, fontWeight: FontWeight.bold),
                   ),
                 ],
               );
