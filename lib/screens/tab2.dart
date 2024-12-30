@@ -1,32 +1,20 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import '../actor.dart';
 
 class Tab2 extends StatefulWidget {
-  const Tab2({Key? key}) : super(key: key);
+  final List<Actor> actors;
+  final Set<String> savedActors;
+  final VoidCallback onSwitchToTab1;
+
+  const Tab2({super.key, required this.actors, required this.savedActors, required this.onSwitchToTab1});
 
   @override
-  _ActorTabState createState() => _ActorTabState();
+  _Tab2State createState() => _Tab2State();
 }
 
-class _ActorTabState extends State<Tab2> {
-  late Future<List<Actor>> actors;
-  final Set<String> savedActors = {}; // To store the saved actor names
-
-  Future<List<Actor>> loadActorData() async {
-    final String response = await rootBundle.loadString('assets/actor.json');
-    final List<dynamic> data = json.decode(response);
-    return data.map((item) => Actor.fromJson(item as Map<String, dynamic>)).toList();
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    actors = loadActorData();
-  }
-
+class _Tab2State extends State<Tab2> {
   Widget _buildDetailRow(String label, value) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -63,7 +51,10 @@ class _ActorTabState extends State<Tab2> {
     for (int i = 0; i < actor.musicals.length; i++) {
       musicals.add(
         GestureDetector(
-          onTap: () => print(actor.musicals[i]),
+          onTap: () {
+            Navigator.of(context).pop();
+            widget.onSwitchToTab1();
+          },
           child: Text(actor.musicals[i])
         )
       );
@@ -140,95 +131,81 @@ class _ActorTabState extends State<Tab2> {
     // Calculate the number of items per row
     final crossAxisCount = ((screenWidth - 40) / itemWidth).floor();
 
-    return FutureBuilder<List<Actor>>(
-      future: actors,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        } else if (snapshot.hasError) {
-          return const Center(child: Text('Error loading actors'));
-        } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return const Center(child: Text('No actors found'));
-        }
+    return Padding(
+      padding: const EdgeInsets.all(20),
+      child: GridView.builder(
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: crossAxisCount, // Dynamic number of items per row
+          crossAxisSpacing: 10, // Horizontal spacing between items
+          mainAxisSpacing: 30, // Vertical spacing between items
+        ),
+        itemCount: widget.actors.length,
+        itemBuilder: (context, index) {
+          final actor = widget.actors[index];
+          final isSaved = widget.savedActors.contains(actor.name); // Check if it's saved
 
-        final actorList = snapshot.data!;
-        return Padding(
-          padding: const EdgeInsets.all(20),
-          child: GridView.builder(
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: crossAxisCount, // Dynamic number of items per row
-              crossAxisSpacing: 10, // Horizontal spacing between items
-              mainAxisSpacing: 30, // Vertical spacing between items
-            ),
-            itemCount: actorList.length,
-            itemBuilder: (context, index) {
-              final actor = actorList[index];
-              final isSaved = savedActors.contains(actor.name); // Check if it's saved
-
-              return Column(
-                children: [
-                  GestureDetector(
-                    onTap: () => _showActorDetails(context, actor),
-                    child: Stack(
-                      children: [
-                        ClipOval(
-                          child: Image.network(
-                            actor.profilePicture,
-                            width: 100,
-                            height: 100,
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                        Positioned(
-                          top: 0,
-                          right: 0,
-                          child: GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                if (isSaved) {
-                                  savedActors.remove(actor.name);
-                                } else {
-                                  savedActors.add(actor.name);
-                                }
-
-                                ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    width: 300,
-                                    content: Text(isSaved ? '저장 해제됨' : '저장됨'),
-                                    duration: const Duration(seconds: 1), // Short duration for quick response
-                                    behavior: SnackBarBehavior.floating, // Makes it appear above other content
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                  ),
-                                );
-                              });
-                            },
-                            child: Icon(
-                              isSaved ? Icons.bookmark : Icons.bookmark_border,
-                              color: isSaved ? Colors.red : Colors.grey,
-                              size: 28,
-                            ),
-                          ),
-                        ),
-                      ],
+          return Column(
+            children: [
+              GestureDetector(
+                onTap: () => _showActorDetails(context, actor),
+                child: Stack(
+                  children: [
+                    ClipOval(
+                      child: Image.network(
+                        actor.profilePicture,
+                        width: 100,
+                        height: 100,
+                        fit: BoxFit.cover,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 10),
-                  Text(
-                    actor.name,
-                    style: const TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold
+                    Positioned(
+                      top: 0,
+                      right: 0,
+                      child: GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            if (isSaved) {
+                              widget.savedActors.remove(actor.name);
+                            } else {
+                              widget.savedActors.add(actor.name);
+                            }
+
+                            ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                width: 300,
+                                content: Text(isSaved ? '저장 해제됨' : '저장됨'),
+                                duration: const Duration(seconds: 1), // Short duration for quick response
+                                behavior: SnackBarBehavior.floating, // Makes it appear above other content
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                              ),
+                            );
+                          });
+                        },
+                        child: Icon(
+                          isSaved ? Icons.favorite : Icons.favorite_border,
+                          color: isSaved ? Colors.red : Colors.grey,
+                          size: 28,
+                        ),
+                      ),
                     ),
-                  ),
-                ],
-              );
-            },
-          ),
-        );
-      },
+                  ],
+                ),
+              ),
+              const SizedBox(height: 10),
+              Text(
+                actor.name,
+                style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold
+                ),
+              ),
+            ],
+          );
+        },
+      ),
     );
   }
 }

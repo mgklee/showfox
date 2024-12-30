@@ -1,45 +1,87 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'screens/tab1.dart';
 import 'screens/tab2.dart';
 import 'screens/tab3.dart';
+import 'musical.dart';
+import 'actor.dart';
 
-void main() {
-  runApp(MyApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized(); // Ensures async operations work before runApp
+
+  // Load data from JSON files
+  final String musicalJson = await rootBundle.loadString('assets/musical.json');
+  final List<dynamic> musicalData = json.decode(musicalJson);
+  final List<Musical> musicals = musicalData.map((item) => Musical.fromJson(item)).toList();
+
+  final String actorJson = await rootBundle.loadString('assets/actor.json');
+  final List<dynamic> actorData = json.decode(actorJson);
+  final List<Actor> actors = actorData.map((item) => Actor.fromJson(item)).toList();
+
+  runApp(MyApp(musicals: musicals, actors: actors));
 }
 
 class MyApp extends StatelessWidget {
+  final List<Musical> musicals;
+  final List<Actor> actors;
+
+  const MyApp({super.key, required this.musicals, required this.actors});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData(scaffoldBackgroundColor: Colors.white),
-      home: HomePage(),
+      home: HomePage(musicals: musicals, actors: actors),
     );
   }
 }
 
 class HomePage extends StatefulWidget {
+  final List<Musical> musicals;
+  final List<Actor> actors;
+
+  const HomePage({super.key, required this.musicals, required this.actors});
+
   @override
   _HomePageState createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
   int _currentIndex = 0;
-
-  // 각 탭의 화면
-  final List<Widget> _tabs = [
-    Tab1(), // tab1.dart의 클래스
-    Tab2(), // tab2.dart의 클래스
-    Tab3(), // tab3.dart의 클래스
-  ];
+  final Set<String> savedMusicals = {}; // Shared state for saved musicals
+  final Set<String> savedActors = {};   // Shared state for saved actors
 
   @override
   Widget build(BuildContext context) {
+    final List<Widget> _tabs = [
+      Tab1(
+        musicals: widget.musicals,
+        savedMusicals: savedMusicals,
+        onSwitchToTab2: () {
+          setState(() {
+            _currentIndex = 1; // Switch to Tab 2
+          });
+        },
+      ),
+      Tab2(
+        actors: widget.actors,
+        savedActors: savedActors,
+        onSwitchToTab1: () {
+          setState(() {
+            _currentIndex = 0; // Switch to Tab 1
+          });
+        },
+      ),
+      Tab3(),
+    ];
+
     return Scaffold(
       appBar: AppBar(
-          title: Text(
+          title: const Text(
             "🦊ShowFOX",
-            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
           ),
           backgroundColor: Colors.orangeAccent
       ),
@@ -56,7 +98,7 @@ class _HomePageState extends State<HomePage> {
         selectedItemColor: Colors.deepOrange,
         // unselectedIconTheme: IconThemeData(color: Colors.white),
         // selectedIconTheme: IconThemeData(color: Colors.deepOrange),
-        items: [
+        items: const [
           BottomNavigationBarItem(
               icon: Icon(Icons.list),
               label: "Musicals"
