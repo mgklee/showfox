@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../actor.dart';
 
 class Tab2 extends StatefulWidget {
@@ -13,7 +14,8 @@ class Tab2 extends StatefulWidget {
 
 class _ActorTabState extends State<Tab2> {
   late Future<List<Actor>> actors;
-  final Set<String> savedActors = {}; // To store the saved actor names
+  List<String> savedActors = [];
+  late final SharedPreferences prefs; // To store the saved actor names
 
   Future<List<Actor>> loadActorData() async {
     final String response = await rootBundle.loadString('assets/actor.json');
@@ -23,10 +25,22 @@ class _ActorTabState extends State<Tab2> {
         .toList();
   }
 
+  Future<List<String>> getPreviousSavedActors() async {
+    prefs = await SharedPreferences.getInstance();
+    final List<String>? previousSavedActors =
+        prefs.getStringList('savedActors');
+    return previousSavedActors ?? [];
+  }
+
+  void getSavedActors() async {
+    savedActors = await getPreviousSavedActors();
+  }
+
   @override
   void initState() {
     super.initState();
     actors = loadActorData();
+    getSavedActors();
   }
 
   Widget _buildDetailRow(String label, String value) {
@@ -177,8 +191,12 @@ class _ActorTabState extends State<Tab2> {
                               setState(() {
                                 if (isSaved) {
                                   savedActors.remove(actor.name);
+                                  prefs.setStringList(
+                                      'savedActors', savedActors);
                                 } else {
                                   savedActors.add(actor.name);
+                                  prefs.setStringList(
+                                      'savedActors', savedActors);
                                 }
 
                                 ScaffoldMessenger.of(context)
@@ -186,7 +204,7 @@ class _ActorTabState extends State<Tab2> {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
                                     width: 300,
-                                    content: Text(isSaved ? '저장됨' : '저장 해제됨'),
+                                    content: Text(isSaved ? '저장 해제됨' : '저장됨'),
                                     duration: const Duration(
                                         seconds:
                                             1), // Short duration for quick response
