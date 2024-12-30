@@ -8,7 +8,7 @@
     "ageLimit": 8,
     "minPrice": 80000,
     "maxPrice": 160000,
-    "actors": "김소현, 신영숙, 차지연, 강필석, 손준호, 김주택, 양준모, 박민성, 백형훈",
+    "actors": ["김소현", "신영숙", "차지연", "강필석", "손준호", "김주택", "양준모", "박민성", "백형훈"],
     "map": "https://map.naver.com/p/entry/place/13412847?c=15.00,0,0,0,dh",
     "url": "https://tickets.interpark.com/goods/p0004107?GoodsCode=P0004107",
     "thumbnail": "https://ticketimage.interpark.com/Play/image/large/P0/P0004107_p.gif"
@@ -22,7 +22,7 @@
     "ageLimit": 8,
     "minPrice": 80000,
     "maxPrice": 170000,
-    "actors": "박은태, 이석훈, 규현, 도영, 서범석, 민영기, 이수빈, 장혜린",
+    "actors": ["박은태", "이석훈", "규현", "도영", "서범석", "민영기", "이수빈", "장혜린"],
     "map": "https://map.naver.com/p/entry/place/13412873?c=15.00,0,0,0,dh",
     "url": "https://tickets.interpark.com/goods/24016737?GoodsCode=24016737",
     "thumbnail": "https://ticketimage.interpark.com/Play/image/large/24/24016737_p.gif"
@@ -36,7 +36,7 @@
     "ageLimit": 14,
     "minPrice": 80000,
     "maxPrice": 170000,
-    "actors": "홍광호, 전동석, 김성철, 윤공주, 선민, 김환희, 조정은, 최수진, 손지수",
+    "actors": ["홍광호", "전동석", "김성철", "윤공주", "선민", "김환희", "조정은", "최수진", "손지수"],
     "map": "https://map.naver.com/p/entry/place/20677258?c=15.00,0,0,0,dh",
     "url": "https://tickets.interpark.com/goods/24013928?GoodsCode=24013928",
     "thumbnail": "https://ticketimage.interpark.com/Play/image/large/24/24013928_p.gif"
@@ -50,7 +50,7 @@
     "ageLimit": 8,
     "minPrice": 90000,
     "maxPrice": 190000,
-    "actors": "김준수, 서경수, 박강현, 정성화, 정원영, 강홍석, 이성경, 민경아, 최지혜",
+    "actors": ["김준수", "서경수", "박강현", "정성화", "정원영", "강홍석", "이성경", "민경아", "최지혜"],
     "map": "https://map.naver.com/p/entry/place/12091168?c=15.00,0,0,0,dh",
     "url": "https://tickets.interpark.com/goods/24012498?GoodsCode=24012498",
     "thumbnail": "https://ticketimage.interpark.com/Play/image/large/24/24012498_p.gif"
@@ -64,7 +64,7 @@
     "ageLimit": 8,
     "minPrice": 70000,
     "maxPrice": 150000,
-    "actors": "조형균, 최재림, 고은성, 나하나, 김수연, 이지수, 임준혁, 차윤해",
+    "actors": ["조형균", "최재림", "고은성", "나하나", "김수연", "이지수", "임준혁", "차윤해"],
     "map": "https://map.naver.com/p/entry/place/13412875?c=15.00,0,0,0,dh",
     "url": "https://tickets.interpark.com/goods/24014885?GoodsCode=24014885",
     "thumbnail": "https://ticketimage.interpark.com/Play/image/large/24/24014885_p.gif"
@@ -78,7 +78,7 @@
     "ageLimit": 8,
     "minPrice": 80000,
     "maxPrice": 170000,
-    "actors": "유준상, 신성록, 민우혁, 고훈정, 이창용, 김건우, 정상훈, 하도권, 김승용",
+    "actors": ["유준상", "신성록", "민우혁", "고훈정", "이창용", "김건우", "정상훈", "하도권", "김승용"],
     "map": "https://map.naver.com/p/entry/place/13413087?c=15.00,0,0,0,dh",
     "url": "https://tickets.interpark.com/goods/24013619?GoodsCode=24013619",
     "thumbnail": "https://ticketimage.interpark.com/Play/image/large/24/24013619_p.gif"
@@ -92,7 +92,7 @@
     "ageLimit": 8,
     "minPrice": 80000,
     "maxPrice": 170000,
-    "actors": "옥주현, 솔라, 에녹, 김성식, 윤소호, 최민철, 노윤, 최나래, 윤사봉",
+    "actors": ["옥주현", "솔라", "에녹", "김성식", "윤소호", "최민철", "노윤", "최나래", "윤사봉"],
     "map": "https://map.naver.com/p/entry/place/11576168?c=15.00,0,0,0,dh",
     "url": "https://tickets.interpark.com/goods/l0000106?GoodsCode=L0000106",
     "thumbnail": "https://ticketimage.interpark.com/Play/image/large/L0/L0000106_p.gif"
@@ -106,7 +106,7 @@
     "ageLimit": 8,
     "minPrice": 60000,
     "maxPrice": 150000,
-    "actors": "마이클리, 박은태, 한지상, 윤형렬, 백형훈, 김보경, 장은아, 정유지",
+    "actors": ["마이클리", "박은태", "한지상", "윤형렬", "백형훈", "김보경", "장은아", "정유지"],
     "map": "https://map.naver.com/p/entry/place/33431886?c=15.00,0,0,0,dh",
     "url": "https://tickets.interpark.com/goods/24012950?GoodsCode=24012950",
     "thumbnail": "https://ticketimage.interpark.com/Play/image/large/24/24012950_p.gif"
@@ -120,7 +120,7 @@
     "ageLimit": 8,
     "minPrice": 70000,
     "maxPrice": 160000,
-    "actors": "윤도현, 엄기준, 손준호, 차지연, 김호영, 서은광, 류승주, 성민재",
+    "actors": ["윤도현", "엄기준", "손준호", "차지연", "김호영", "서은광", "류승주", "성민재"],
     "map": "https://map.naver.com/p/entry/place/20152049?c=15.00,0,0,0,dh",
     "url": "https://tickets.interpark.com/goods/24011935?GoodsCode=24011935",
     "thumbnail": "https://ticketimage.interpark.com/Play/image/large/24/24011935_p.gif"
@@ -134,7 +134,7 @@
     "ageLimit": 8,
     "minPrice": 70000,
     "maxPrice": 90000,
-    "actors": "박지연, 박진주, 이봄소리, 송원근, 전성우, 이재환, 정시현, 신은총, 윤철주",
+    "actors": ["박지연", "박진주", "이봄소리", "송원근", "전성우", "이재환", "정시현", "신은총", "윤철주"],
     "map": "https://map.naver.com/p/entry/place/13412903?c=15.00,0,0,0,dh",
     "url": "https://tickets.interpark.com/goods/24016412?GoodsCode=24016412",
     "thumbnail": "https://ticketimage.interpark.com/Play/image/large/24/24016412_p.gif"

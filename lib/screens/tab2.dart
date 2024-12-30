@@ -27,7 +27,7 @@ class _ActorTabState extends State<Tab2> {
     actors = loadActorData();
   }
 
-  Widget _buildDetailRow(String label, String value) {
+  Widget _buildDetailRow(String label, value) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -39,7 +39,7 @@ class _ActorTabState extends State<Tab2> {
           ),
         ),
         Flexible(
-          child: Text(value),
+          child: value,
         ),
       ],
     );
@@ -57,6 +57,20 @@ class _ActorTabState extends State<Tab2> {
     final imagePaths = assets
         .where((String imagePath) => imagePath.startsWith(directory))
         .toList();
+
+    List<Widget> musicals = [];
+
+    for (int i = 0; i < actor.musicals.length; i++) {
+      musicals.add(
+        GestureDetector(
+          onTap: () => print(actor.musicals[i]),
+          child: Text(actor.musicals[i])
+        )
+      );
+      if (i+1 < actor.musicals.length) {
+        musicals.add(const Text(", "));
+      }
+    }
 
     showDialog(
       context: context,
@@ -94,10 +108,10 @@ class _ActorTabState extends State<Tab2> {
                     ),
                   ),
                   const SizedBox(height: 20),
-                  _buildDetailRow("생년월일", actor.birthday),
-                  _buildDetailRow("데뷔", "${actor.debutYear}년 ${actor.debutWork}"),
-                  _buildDetailRow("소속사", actor.company),
-                  _buildDetailRow("작품", actor.musicals),
+                  _buildDetailRow("생년월일", Text(actor.birthday)),
+                  _buildDetailRow("데뷔", Text("${actor.debutYear}년 ${actor.debutWork}")),
+                  _buildDetailRow("소속사", Text(actor.company)),
+                  _buildDetailRow("작품", Wrap(children: musicals)),
                 ],
               ),
             ),
@@ -154,9 +168,7 @@ class _ActorTabState extends State<Tab2> {
               return Column(
                 children: [
                   GestureDetector(
-                    onTap: () {
-                      _showActorDetails(context, actor);
-                    },
+                    onTap: () => _showActorDetails(context, actor),
                     child: Stack(
                       children: [
                         ClipOval(
@@ -183,7 +195,7 @@ class _ActorTabState extends State<Tab2> {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
                                     width: 300,
-                                    content: Text(isSaved ? '저장됨' : '저장 해제됨'),
+                                    content: Text(isSaved ? '저장 해제됨' : '저장됨'),
                                     duration: const Duration(seconds: 1), // Short duration for quick response
                                     behavior: SnackBarBehavior.floating, // Makes it appear above other content
                                     shape: RoundedRectangleBorder(

@@ -5,7 +5,7 @@ class Actor {
   final String debutWork;
   final String birthday;
   final String company;
-  final String musicals;
+  final List musicals;
   final String profilePicture;
 
   Actor({
@@ -27,7 +27,7 @@ class Actor {
       debutWork: json['debutWork'] as String,
       birthday: json['birthday'] as String,
       company: json['company'] as String,
-      musicals: json['musicals'] as String,
+      musicals: json['musicals'] as List,
       profilePicture: json['profilePicture'] as String,
     );
   }

@@ -28,7 +28,7 @@ class _MusicalTabState extends State<Tab1> {
     musicals = loadMusicalData();
   }
 
-  Widget _buildDetailRow(String label, String value) {
+  Widget _buildDetailRow(String label, value) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -40,7 +40,7 @@ class _MusicalTabState extends State<Tab1> {
           ),
         ),
         Flexible(
-          child: Text(value),
+          child: value,
         ),
       ],
     );
@@ -48,6 +48,19 @@ class _MusicalTabState extends State<Tab1> {
 
   void _showMusicalDetails(BuildContext context, Musical musical) {
     final NumberFormat currencyFormat = NumberFormat("#,###");
+    List<Widget> actors = [];
+
+    for (int i = 0; i < musical.actors.length; i++) {
+      actors.add(
+        GestureDetector(
+          onTap: () => print(musical.actors[i]),
+          child: Text(musical.actors[i])
+        )
+      );
+      if (i+1 < musical.actors.length) {
+        actors.add(const Text(", "));
+      }
+    }
 
     showDialog(
       context: context,
@@ -64,12 +77,12 @@ class _MusicalTabState extends State<Tab1> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildDetailRow("장소", musical.place),
-              _buildDetailRow("공연기간", "${musical.firstDate} ~ ${musical.lastDate}"),
-              _buildDetailRow("공연시간", "${musical.duration}분 (인터미션 20분 포함)"),
-              _buildDetailRow("관람연령", "${musical.ageLimit}세 이상 관람가능"),
-              _buildDetailRow("가격", "${currencyFormat.format(musical.minPrice)} ~ ${currencyFormat.format(musical.maxPrice)}원"),
-              _buildDetailRow("캐스팅", musical.actors),
+              _buildDetailRow("장소", Text(musical.place)),
+              _buildDetailRow("공연기간", Text("${musical.firstDate} ~ ${musical.lastDate}")),
+              _buildDetailRow("공연시간", Text("${musical.duration}분 (인터미션 20분 포함)")),
+              _buildDetailRow("관람연령", Text("${musical.ageLimit}세 이상 관람가능")),
+              _buildDetailRow("가격", Text("${currencyFormat.format(musical.minPrice)} ~ ${currencyFormat.format(musical.maxPrice)}원")),
+              _buildDetailRow("캐스팅", Wrap(children: actors)),
             ],
           ),
           actions: [
@@ -134,9 +147,7 @@ class _MusicalTabState extends State<Tab1> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           GestureDetector(
-                            onTap: () {
-                              _showMusicalDetails(context, musical);
-                            },
+                            onTap: () => _showMusicalDetails(context, musical),
                             child: Stack(
                               children: [
                                 Image.network(
@@ -161,7 +172,7 @@ class _MusicalTabState extends State<Tab1> {
                                         ScaffoldMessenger.of(context).showSnackBar(
                                           SnackBar(
                                             width: 300,
-                                            content: Text(isSaved ? '저장됨' : '저장 해제됨'),
+                                            content: Text(isSaved ? '저장 해제됨' : '저장됨'),
                                             duration: const Duration(seconds: 1), // Short duration for quick response
                                             behavior: SnackBarBehavior.floating, // Makes it appear above other content
                                             shape: RoundedRectangleBorder(
