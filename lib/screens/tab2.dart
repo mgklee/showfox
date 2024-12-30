@@ -15,32 +15,28 @@ class Tab2 extends StatefulWidget {
 class _ActorTabState extends State<Tab2> {
   late Future<List<Actor>> actors;
   List<String> savedActors = [];
-  late final SharedPreferences prefs; // To store the saved actor names
+  late SharedPreferences prefs; // 초기화 가능하도록 변경
 
   Future<List<Actor>> loadActorData() async {
-      final String response = await rootBundle.loadString('assets/actor.json');
+    final String response = await rootBundle.loadString('assets/actor.json');
     final List<dynamic> data = json.decode(response);
     return data
         .map((item) => Actor.fromJson(item as Map<String, dynamic>))
         .toList();
   }
 
-  Future<List<String>> getPreviousSavedActors() async {
+  Future<void> initSharedPreferences() async {
     prefs = await SharedPreferences.getInstance();
-    final List<String>? previousSavedActors =
-        prefs.getStringList('savedActors');
-    return previousSavedActors ?? [];
-  }
-
-  void getSavedActors() async {
-    savedActors = await getPreviousSavedActors();
+    setState(() {
+      savedActors = prefs.getStringList('savedActors') ?? [];
+    });
   }
 
   @override
   void initState() {
     super.initState();
     actors = loadActorData();
-    getSavedActors();
+    initSharedPreferences();
   }
 
   Widget _buildDetailRow(String label, String value) {
@@ -66,10 +62,7 @@ class _ActorTabState extends State<Tab2> {
     final assetManifest = await AssetManifest.loadFromAssetBundle(bundle);
     final assets = assetManifest.listAssets();
 
-    // Format the directory name based on the actor's name
     final directory = 'assets/images/${actor.code}/';
-
-    // Filter out images in the dynamically chosen directory
     final imagePaths = assets
         .where((String imagePath) => imagePath.startsWith(directory))
         .toList();
@@ -77,54 +70,82 @@ class _ActorTabState extends State<Tab2> {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(
-            "${actor.name} 상세정보",
-            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-          ),
-          content: SizedBox(
-            width:
-                MediaQuery.of(context).size.width * 0.8, // 80% of screen width
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  CarouselSlider(
-                    items: imagePaths.map((imagePath) {
-                      return ClipRRect(
-                        borderRadius: BorderRadius.circular(10),
-                        child: Image.asset(
-                          imagePath,
-                          fit: BoxFit.cover,
-                        ),
-                      );
-                    }).toList(),
-                    options: CarouselOptions(
-                      height: 400,
-                      enlargeCenterPage: true,
-                      enableInfiniteScroll: true,
-                      autoPlay: true,
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  _buildDetailRow("생년월일", actor.birthday),
-                  _buildDetailRow(
-                      "데뷔", "${actor.debutYear}년 ${actor.debutWork}"),
-                  _buildDetailRow("소속사", actor.company),
-                  _buildDetailRow("작품", actor.musicals),
-                ],
+        int currentIndex = 0; // 다이얼로그 내부 상태 관리
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return AlertDialog(
+              title: Text(
+                "${actor.name} 상세정보",
+                style:
+                    const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(); // Close the dialog
-              },
-              child: const Text('닫기'),
-            ),
-          ],
+              content: SizedBox(
+                width: MediaQuery.of(context).size.width *
+                    0.8, // 80% of screen width
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      CarouselSlider(
+                        items: imagePaths.map((imagePath) {
+                          return ClipRRect(
+                            borderRadius: BorderRadius.circular(10),
+                            child: Image.asset(
+                              imagePath,
+                              fit: BoxFit.cover,
+                            ),
+                          );
+                        }).toList(),
+                        options: CarouselOptions(
+                          height: 400,
+                          onPageChanged: (index, reason) {
+                            setState(() {
+                              currentIndex = index;
+                            });
+                          },
+                          enlargeCenterPage: true,
+                          enableInfiniteScroll: true,
+                          autoPlay: true,
+                        ),
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: imagePaths.asMap().entries.map((entry) {
+                          return Container(
+                            width: 8,
+                            height: 8,
+                            margin: const EdgeInsets.symmetric(
+                                vertical: 2, horizontal: 2),
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Colors.black.withOpacity(
+                                currentIndex == entry.key ? 1 : 0.5,
+                              ),
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                      const SizedBox(height: 20),
+                      _buildDetailRow("생년월일", actor.birthday),
+                      _buildDetailRow(
+                          "데뷔", "${actor.debutYear}년 ${actor.debutWork}"),
+                      _buildDetailRow("소속사", actor.company),
+                      _buildDetailRow("작품", actor.musicals),
+                    ],
+                  ),
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop(); // Close the dialog
+                  },
+                  child: const Text('닫기'),
+                ),
+              ],
+            );
+          },
         );
       },
     );
@@ -132,13 +153,8 @@ class _ActorTabState extends State<Tab2> {
 
   @override
   Widget build(BuildContext context) {
-    // Get the screen width
     final screenWidth = MediaQuery.of(context).size.width;
-
-    // Define the size of each item (including spacing)
     const double itemWidth = 150;
-
-    // Calculate the number of items per row
     final crossAxisCount = ((screenWidth - 40) / itemWidth).floor();
 
     return FutureBuilder<List<Actor>>(
@@ -158,14 +174,13 @@ class _ActorTabState extends State<Tab2> {
           child: GridView.builder(
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: crossAxisCount, // Dynamic number of items per row
-              crossAxisSpacing: 10, // Horizontal spacing between items
-              mainAxisSpacing: 30, // Vertical spacing between items
+              crossAxisSpacing: 10,
+              mainAxisSpacing: 30,
             ),
             itemCount: actorList.length,
             itemBuilder: (context, index) {
               final actor = actorList[index];
-              final isSaved =
-                  savedActors.contains(actor.name); // Check if it's saved
+              final isSaved = savedActors.contains(actor.name);
 
               return Column(
                 children: [
@@ -191,31 +206,23 @@ class _ActorTabState extends State<Tab2> {
                               setState(() {
                                 if (isSaved) {
                                   savedActors.remove(actor.name);
-                                  prefs.setStringList(
-                                      'savedActors', savedActors);
                                 } else {
                                   savedActors.add(actor.name);
-                                  prefs.setStringList(
-                                      'savedActors', savedActors);
                                 }
-
-                                ScaffoldMessenger.of(context)
-                                    .hideCurrentSnackBar();
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    width: 300,
-                                    content: Text(isSaved ? '저장 해제됨' : '저장됨'),
-                                    duration: const Duration(
-                                        seconds:
-                                            1), // Short duration for quick response
-                                    behavior: SnackBarBehavior
-                                        .floating, // Makes it appear above other content
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                  ),
-                                );
+                                prefs.setStringList('savedActors', savedActors);
                               });
+
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  width: 300,
+                                  content: Text(isSaved ? '저장 해제됨' : '저장됨'),
+                                  duration: const Duration(seconds: 1),
+                                  behavior: SnackBarBehavior.floating,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                ),
+                              );
                             },
                             child: Icon(
                               isSaved ? Icons.bookmark : Icons.bookmark_border,
