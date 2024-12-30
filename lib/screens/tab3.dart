@@ -3,10 +3,9 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:table_calendar/table_calendar.dart';
 import '../musical.dart';
-import 'tab1.dart' as tab1;
-
 
 class Tab3 extends StatefulWidget {
   const Tab3({Key? key}) : super(key: key);
@@ -17,11 +16,13 @@ class Tab3 extends StatefulWidget {
 
 class _Tab3State extends State<Tab3> {
   late Future<List<Musical>> musicals;
+  List<String> savedMusicals = [];
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
   Map<DateTime, List<String>> events = {};
   TextEditingController _eventController = TextEditingController();
   late final ValueNotifier<List<String>> _selectedEvents;
+  late final SharedPreferences prefs;
 
   Future<List<Musical>> loadMusicalData() async {
     final String response = await rootBundle.loadString('../../assets/musical.json');
@@ -29,6 +30,17 @@ class _Tab3State extends State<Tab3> {
     return data.map((item) => Musical.fromJson(item as Map<String, dynamic>)).toList();
   }
 
+  Future<List<String>> getPreviousSavedMusicals() async {
+    prefs = await SharedPreferences.getInstance();
+    final List<String>? previousSavedMusicals = prefs.getStringList('savedMusicals');
+    return previousSavedMusicals ?? [];
+  }
+
+  void getSavedMusicals() async {
+    savedMusicals = await getPreviousSavedMusicals();
+  }
+
+  // Musical JSON read, add musical schedule to Event list
   Future<void> makeEventFromMusical() async {
     List<Musical>musicalsForEvent = await loadMusicalData();
     Map<DateTime, List<String>> newEvents = {};
@@ -41,33 +53,27 @@ class _Tab3State extends State<Tab3> {
       if (!newEvents.containsKey(startDate)) {
         newEvents[startDate] = [];
       }
-      newEvents[startDate]!.add(title + " 시작일");
+      newEvents[startDate]!.add("[" + title + "] 시작일");
 
       if (!newEvents.containsKey(endDate)) {
         newEvents[endDate] = [];
       }
-      newEvents[endDate]!.add(title + " 마감일");
+      newEvents[endDate]!.add("[" + title + "] 마감일");
     }
-
-    print(newEvents);
 
     setState(() {
       events = newEvents;
     });
   }
 
-
   @override
-  void initState() {
+  void initState() async {
     super.initState();
-    log("Init Started");
     _selectedDay = _focusedDay;
     _selectedEvents = ValueNotifier(_getEventsForDay(_selectedDay!));
-    log("init started2");
     musicals = loadMusicalData();
-    log("loading musicals ended");
     makeEventFromMusical();
-    log("loading events ended");
+    getSavedMusicals();
   }
 
   @override
@@ -85,15 +91,10 @@ class _Tab3State extends State<Tab3> {
   DateTime changeStringToDateTime(String date){
     DateFormat format = DateFormat("yyyy.MM.dd");
     DateTime day = format.parse(date);
-    log("Log of the changeStringToDateTime");
-    log("${day}");
     return addZ(day);
   }
 
   List<String> _getEventsForDay(DateTime day) {
-    log("Log of the getEventsForDay");
-    log("${day}");
-    log("${events[day]}");
     return events[day] ?? [];
   }
 
@@ -169,10 +170,25 @@ class _Tab3State extends State<Tab3> {
               titleCentered: true,
               formatButtonVisible: false,
             ),
-            calendarStyle: CalendarStyle(
-              defaultTextStyle:TextStyle(color: Colors.blue),
-              weekNumberTextStyle:TextStyle(color: Colors.red),
-              weekendTextStyle:TextStyle(color: Colors.pink),
+            calendarBuilders: CalendarBuilders(
+              defaultBuilder: (context, day, focusedDay) {
+                if (day.weekday == DateTime.saturday) {
+                  return Center(
+                    child: Text(
+                      '${day.day}',
+                      style: TextStyle(color: Colors.blue),
+                    ),
+                  );
+                } else if (day.weekday == DateTime.sunday) {
+                  return Center(
+                    child: Text(
+                      '${day.day}',
+                      style: TextStyle(color: Colors.red),
+                    ),
+                  );
+                }
+                return null;
+              },
             ),
           ),
           const SizedBox(height: 8.0),

@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../musical.dart';
 
@@ -14,7 +15,8 @@ class Tab1 extends StatefulWidget {
 
 class _MusicalTabState extends State<Tab1> {
   late Future<List<Musical>> musicals;
-  final Set<String> savedMusicals = {}; // To store the saved musical titles
+  List<String> savedMusicals = []; // To store the saved musical titles
+  late final SharedPreferences prefs;
 
   Future<List<Musical>> loadMusicalData() async {
     final String response = await rootBundle.loadString('assets/musical.json');
@@ -22,10 +24,21 @@ class _MusicalTabState extends State<Tab1> {
     return data.map((item) => Musical.fromJson(item as Map<String, dynamic>)).toList();
   }
 
+  Future<List<String>> getPreviousSavedMusicals() async {
+    prefs = await SharedPreferences.getInstance();
+    final List<String>? previousSavedMusicals = prefs.getStringList('savedMusicals');
+    return previousSavedMusicals ?? [];
+  }
+
+  void getSavedMusicals() async {
+    savedMusicals = await getPreviousSavedMusicals();
+  }
+
   @override
   void initState() {
     super.initState();
     musicals = loadMusicalData();
+    getSavedMusicals();
   }
 
   Widget _buildDetailRow(String label, String value) {
@@ -153,15 +166,17 @@ class _MusicalTabState extends State<Tab1> {
                                       setState(() {
                                         if (isSaved) {
                                           savedMusicals.remove(musical.title);
+                                          prefs.setStringList('savedMusicals', savedMusicals);
                                         } else {
                                           savedMusicals.add(musical.title);
+                                          prefs.setStringList('savedMusicals', savedMusicals);
                                         }
 
                                         ScaffoldMessenger.of(context).hideCurrentSnackBar();
                                         ScaffoldMessenger.of(context).showSnackBar(
                                           SnackBar(
                                             width: 300,
-                                            content: Text(isSaved ? '저장됨' : '저장 해제됨'),
+                                            content: Text(isSaved ? '저장 해제됨' : '저장됨'),
                                             duration: const Duration(seconds: 1), // Short duration for quick response
                                             behavior: SnackBarBehavior.floating, // Makes it appear above other content
                                             shape: RoundedRectangleBorder(
