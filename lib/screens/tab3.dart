@@ -23,6 +23,8 @@ class _Tab3State extends State<Tab3> {
   TextEditingController _eventController = TextEditingController();
   late final ValueNotifier<List<String>> _selectedEvents;
   late final SharedPreferences prefs;
+  bool buttonMusicalPressed = false;
+  bool buttonActorPressed = false;
 
   Future<List<Musical>> loadMusicalData() async {
     final String response = await rootBundle.loadString('../../assets/musical.json');
@@ -160,6 +162,22 @@ class _Tab3State extends State<Tab3> {
       ),
       body: Column(
         children: [
+          CheckboxListTile(
+            title: const Text("원하는 뮤지컬 골라보기"),
+            value: buttonMusicalPressed,
+            onChanged: (bool? newValue) {
+              buttonMusicalPressed = newValue!;
+            },
+            controlAffinity: ListTileControlAffinity.leading,  //  <-- leading Checkbox
+          ),
+          CheckboxListTile(
+            title: const Text("원하는 배우 골라보기"),
+            value: buttonActorPressed,
+            onChanged: (bool? newValue) {
+              buttonActorPressed = !buttonActorPressed;
+            },
+            controlAffinity: ListTileControlAffinity.leading,  //  <-- leading Checkbox
+          ),
           TableCalendar(
             locale: 'ko_KR',
             firstDay: DateTime.utc(2021, 10, 16),
