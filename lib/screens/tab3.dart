@@ -467,12 +467,12 @@ class _Tab3State extends State<Tab3> {
                         return Dismissible(
                           key: UniqueKey(),
                           background: Container(color: Colors.red,),
-                          direction: DismissDirection.startToEnd,//왼쪽에서 오른쪽으로 스와이프
+                          direction: DismissDirection.startToEnd,
                           onDismissed: (direction){//값을 완전히 삭제
                             setState(() {
                               final dateIndex = addedDate.indexOf(_selectedDay!.toIso8601String());
                               final titleIndex = addedTitle.indexOf(value[index]);
-                              if (dateIndex != -1 && titleIndex != -1 && addedTitle.contains(element)) {
+                              if (dateIndex != -1 && titleIndex != -1 && addedDate.contains(_selectedDay!.toIso8601String()) && addedTitle.contains(value[index])) {
                                 addedDate.removeAt(dateIndex);
                                 addedTitle.removeAt(titleIndex);
 
@@ -483,18 +483,21 @@ class _Tab3State extends State<Tab3> {
                                 if (eventList != null) {
                                   eventList.remove(value[index]);
                                   if (eventList.isEmpty) {
-                                    events.remove(_selectedDay!); // 리스트가 비어 있으면 날짜 자체 제거
+                                    events.remove(_selectedDay!);
                                   } else {
-                                    events[_selectedDay!] = eventList; // 갱신된 리스트 재할당
+                                    events[_selectedDay!] = eventList;
                                   }
                                 }
                                 _selectedEvents.value = _getEventsForDay(_selectedDay!);
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text('${value[index]}이(가) 삭제되었습니다.')),
+                                );
+                              } else{
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text('존재하는 뮤지컬 일정은 삭제할 수 없습니다.')),
+                                );
                               }
                             });
-
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('${value[index]}이(가) 삭제되었습니다.')),
-                            );
                           },
                           child: ListTile(
                               title: Text(value[index]),
