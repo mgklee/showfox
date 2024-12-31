@@ -7,7 +7,7 @@ class Musical {
   final int ageLimit;
   final int minPrice;
   final int maxPrice;
-  final String actors;
+  final List actors;
   final String map;
   final String url;
   final String thumbnail;
@@ -37,7 +37,7 @@ class Musical {
       ageLimit: json['ageLimit'] as int,
       minPrice: json['minPrice'] as int,
       maxPrice: json['maxPrice'] as int,
-      actors: json['actors'] as String,
+      actors: json['actors'] as List,
       map: json['map'] as String,
       url: json['url'] as String,
       thumbnail: json['thumbnail'] as String,

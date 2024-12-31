@@ -1,47 +1,40 @@
-import 'dart:convert';
 import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:carousel_slider/carousel_slider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../musical.dart';
+import '../actor.dart';
 
 class Tab1 extends StatefulWidget {
-  const Tab1({Key? key}) : super(key: key);
+  final List<Musical> musicals;
+  final List<Actor> actors;
+
+  const Tab1({super.key, required this.musicals, required this.actors});
 
   @override
-  _MusicalTabState createState() => _MusicalTabState();
+  _Tab1State createState() => _Tab1State();
 }
 
-class _MusicalTabState extends State<Tab1> {
-  late Future<List<Musical>> musicals;
-  List<String> savedMusicals = []; // To store the saved musical titles
+class _Tab1State extends State<Tab1> {
+  List<String> savedMusicals = [];
   late final SharedPreferences prefs;
 
-  Future<List<Musical>> loadMusicalData() async {
-    final String response = await rootBundle.loadString('assets/musical.json');
-    final List<dynamic> data = json.decode(response);
-    return data.map((item) => Musical.fromJson(item as Map<String, dynamic>)).toList();
-  }
-
-  Future<List<String>> getPreviousSavedMusicals() async {
+  Future<void> initSharedPreferences() async {
     prefs = await SharedPreferences.getInstance();
-    final List<String>? previousSavedMusicals = prefs.getStringList('savedMusicals');
-    return previousSavedMusicals ?? [];
-  }
-
-  void getSavedMusicals() async {
-    savedMusicals = await getPreviousSavedMusicals();
+    setState(() {
+      savedMusicals = prefs.getStringList('savedMusicals') ?? [];
+    });
   }
 
   @override
   void initState() {
     super.initState();
-    musicals = loadMusicalData();
-    getSavedMusicals();
+    initSharedPreferences();
   }
 
-  Widget _buildDetailRow(String label, String value) {
+  Widget _buildDetailRow(String label, value) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -53,7 +46,7 @@ class _MusicalTabState extends State<Tab1> {
           ),
         ),
         Flexible(
-          child: Text(value),
+          child: value,
         ),
       ],
     );
@@ -61,6 +54,33 @@ class _MusicalTabState extends State<Tab1> {
 
   void _showMusicalDetails(BuildContext context, Musical musical) {
     final NumberFormat currencyFormat = NumberFormat("#,###");
+    List<Widget> actors = [];
+
+    for (int i = 0; i < musical.actors.length; i++) {
+      Iterable<Actor> match = widget.actors.where(
+        (element) => element.name == musical.actors[i]
+      );
+
+      if (match.isEmpty) {
+        actors.add(Text(musical.actors[i]));
+      } else {
+        for (Actor actor in match) {
+          actors.add(
+            GestureDetector(
+              onTap: () {
+                Navigator.of(context).pop();
+                _showActorDetails(context, actor);
+              },
+              child: Text(musical.actors[i]),
+            ),
+          );
+        }
+      }
+
+      if (i+1 < musical.actors.length) {
+        actors.add(const Text(", "));
+      }
+    }
 
     showDialog(
       context: context,
@@ -69,20 +89,20 @@ class _MusicalTabState extends State<Tab1> {
           title: Text(
             "${musical.title} 상세정보",
             style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold
+              fontSize: 20,
+              fontWeight: FontWeight.bold
             ),
           ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildDetailRow("장소", musical.place),
-              _buildDetailRow("공연기간", "${musical.firstDate} ~ ${musical.lastDate}"),
-              _buildDetailRow("공연시간", "${musical.duration}분 (인터미션 20분 포함)"),
-              _buildDetailRow("관람연령", "${musical.ageLimit}세 이상 관람가능"),
-              _buildDetailRow("가격", "${currencyFormat.format(musical.minPrice)} ~ ${currencyFormat.format(musical.maxPrice)}원"),
-              _buildDetailRow("캐스팅", musical.actors),
+              _buildDetailRow("장소", Text(musical.place)),
+              _buildDetailRow("공연기간", Text("${musical.firstDate} ~ ${musical.lastDate}")),
+              _buildDetailRow("공연시간", Text("${musical.duration}분 (인터미션 20분 포함)")),
+              _buildDetailRow("관람연령", Text("${musical.ageLimit}세 이상 관람가능")),
+              _buildDetailRow("가격", Text("${currencyFormat.format(musical.minPrice)} ~ ${currencyFormat.format(musical.maxPrice)}원")),
+              _buildDetailRow("캐스팅", Wrap(children: actors)),
             ],
           ),
           actions: [
@@ -112,112 +132,223 @@ class _MusicalTabState extends State<Tab1> {
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return FutureBuilder<List<Musical>>(
-      future: musicals,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        } else if (snapshot.hasError) {
-          return const Center(child: Text('Error loading musicals'));
-        } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return const Center(child: Text('No musicals found'));
+  void _showActorDetails(BuildContext context, Actor actor) async {
+    AssetBundle bundle = DefaultAssetBundle.of(context);
+    final assetManifest = await AssetManifest.loadFromAssetBundle(bundle);
+    final assets = assetManifest.listAssets();
+
+    // Format the directory name based on the actor's name
+    final directory = 'assets/images/${actor.code}/';
+
+    // Filter out images in the dynamically chosen directory
+    final imagePaths = assets
+        .where((String imagePath) => imagePath.startsWith(directory))
+        .toList();
+
+    List<Widget> musicals = [];
+
+    for (int i = 0; i < actor.musicals.length; i++) {
+      Iterable<Musical> match = widget.musicals.where(
+              (element) => element.title == actor.musicals[i]
+      );
+
+      if (match.isEmpty) {
+        musicals.add(Text(actor.musicals[i]));
+      } else {
+        for (Musical musical in match) {
+          musicals.add(
+            GestureDetector(
+              onTap: () {
+                Navigator.of(context).pop();
+                _showMusicalDetails(context, musical);
+              },
+              child: Text(actor.musicals[i]),
+            ),
+          );
         }
+      }
 
-        final musicalList = snapshot.data!;
-        return ListView.builder(
-          scrollDirection: Axis.horizontal, // Set the scrolling direction to horizontal
-          physics: const BouncingScrollPhysics(), // Enables smooth scrolling
-          itemCount: musicalList.length,
-          itemBuilder: (context, index) {
-            final musical = musicalList[index];
-            final isSaved = savedMusicals.contains(musical.title); // Check if it's saved
+      if (i+1 < actor.musicals.length) {
+        musicals.add(const Text(", "));
+      }
+    }
 
-            return SizedBox(
-              width: 300, // Set a fixed width for each card
-              child: Card(
-                color: Colors.orangeAccent[100],
-                margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 20),
-                child: Stack(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.all(15),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        int currentIndex = 0;
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return AlertDialog(
+              title: Text(
+                "${actor.name} 상세정보",
+                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+              content: SizedBox(
+                width: MediaQuery.of(context).size.width * 0.8, // 80% of screen width
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Stack(
+                        alignment: Alignment.center,
                         children: [
-                          GestureDetector(
-                            onTap: () {
-                              _showMusicalDetails(context, musical);
-                            },
-                            child: Stack(
-                              children: [
-                                Image.network(
-                                  musical.thumbnail,
-                                  width: double.infinity,
-                                  height: 350, // Fixed height for the image
-                                  fit: BoxFit.contain,
+                          CarouselSlider(
+                            items: imagePaths.map((imagePath) {
+                              return ClipRRect(
+                                borderRadius: BorderRadius.circular(10),
+                                child: Image.asset(
+                                  imagePath,
+                                  fit: BoxFit.cover,
                                 ),
-                                Positioned(
-                                  top: 8,
-                                  right: 0,
-                                  child: GestureDetector(
-                                    onTap: () {
-                                      setState(() {
-                                        if (isSaved) {
-                                          savedMusicals.remove(musical.title);
-                                          prefs.setStringList('savedMusicals', savedMusicals);
-                                        } else {
-                                          savedMusicals.add(musical.title);
-                                          prefs.setStringList('savedMusicals', savedMusicals);
-                                        }
-
-                                        ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                                        ScaffoldMessenger.of(context).showSnackBar(
-                                          SnackBar(
-                                            width: 300,
-                                            content: Text(isSaved ? '저장 해제됨' : '저장됨'),
-                                            duration: const Duration(seconds: 1), // Short duration for quick response
-                                            behavior: SnackBarBehavior.floating, // Makes it appear above other content
-                                            shape: RoundedRectangleBorder(
-                                              borderRadius: BorderRadius.circular(8),
-                                            ),
-                                          ),
-                                        );
-                                      });
-                                    },
-                                    child: Icon(
-                                      isSaved ? Icons.bookmark : Icons.bookmark_border,
-                                      color: isSaved ? Colors.red : Colors.grey,
-                                      size: 28,
+                              );
+                            }).toList(),
+                            options: CarouselOptions(
+                              height: MediaQuery.of(context).size.height * 0.5,
+                              onPageChanged: (index, reason) {
+                                setState(() {
+                                  currentIndex = index;
+                                });
+                              },
+                              enlargeCenterPage: true,
+                              enableInfiniteScroll: true,
+                              autoPlay: true,
+                            ),
+                          ),
+                          Positioned(
+                            bottom: 5,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: imagePaths.asMap().entries.map((entry) {
+                                return Container(
+                                  width: 8,
+                                  height: 8,
+                                  margin: const EdgeInsets.symmetric(
+                                      vertical: 2, horizontal: 2),
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: Colors.white.withOpacity(
+                                      currentIndex == entry.key ? 1 : 0.5,
                                     ),
                                   ),
-                                ),
-                              ],
+                                );
+                              }).toList(),
                             ),
                           ),
-                          const SizedBox(height: 10),
-                          Text(
-                            musical.title,
-                            style: const TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold
+                        ],
+                      ),
+                      const SizedBox(height: 20),
+                      _buildDetailRow("생년월일", Text(actor.birthday)),
+                      _buildDetailRow("데뷔", Text("${actor.debutYear}년 ${actor.debutWork}")),
+                      _buildDetailRow("소속사", Text(actor.company)),
+                      _buildDetailRow("작품", Wrap(children: musicals)),
+                    ],
+                  ),
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop(); // Close the dialog
+                  },
+                  child: const Text('닫기'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.builder(
+      scrollDirection: Axis.horizontal, // Set the scrolling direction to horizontal
+      physics: const BouncingScrollPhysics(), // Enables smooth scrolling
+      itemCount: widget.musicals.length,
+      itemBuilder: (context, index) {
+        final musical = widget.musicals[index];
+        final isSaved = savedMusicals.contains(musical.title); // Check if it's saved
+
+        return SizedBox(
+          width: 300, // Set a fixed width for each card
+          child: Card(
+            color: Colors.orangeAccent[100],
+            margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 20),
+            child: Padding(
+              padding: const EdgeInsets.all(15),
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    GestureDetector(
+                      onTap: () => _showMusicalDetails(context, musical),
+                      child: Stack(
+                        children: [
+                          Image.network(
+                            musical.thumbnail,
+                            width: double.infinity,
+                            height: 350, // Fixed height for the image
+                            fit: BoxFit.contain,
+                          ),
+                          Positioned(
+                            top: 8,
+                            right: 0,
+                            child: GestureDetector(
+                              onTap: () {
+                                setState(() {
+                                  if (isSaved) {
+                                    savedMusicals.remove(musical.title);
+                                  } else {
+                                    savedMusicals.add(musical.title);
+                                  }
+                                  prefs.setStringList('savedMusicals', savedMusicals);
+
+                                  ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      width: 300,
+                                      content: Text(isSaved ? '저장 해제됨' : '저장됨'),
+                                      duration: const Duration(seconds: 1), // Short duration for quick response
+                                      behavior: SnackBarBehavior.floating, // Makes it appear above other content
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                    ),
+                                  );
+                                });
+                              },
+                              child: Icon(
+                                isSaved ? Icons.bookmark : Icons.bookmark_border,
+                                color: isSaved ? Colors.red : Colors.grey,
+                                size: 28,
+                              ),
                             ),
                           ),
-                          const SizedBox(height: 5),
-                          Text(
-                            musical.place,
-                            style: const TextStyle(fontSize: 15),
-                          ),
-                          Text("${musical.firstDate} ~ ${musical.lastDate}"),
                         ],
                       ),
                     ),
+                    const SizedBox(height: 10),
+                    Text(
+                      musical.title,
+                      style: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold
+                      ),
+                    ),
+                    const SizedBox(height: 5),
+                    Text(
+                      musical.place,
+                      style: const TextStyle(fontSize: 15),
+                    ),
+                    Text("${musical.firstDate} ~ ${musical.lastDate}"),
                   ],
                 ),
               ),
-            );
-          },
+            ),
+          ),
         );
       },
     );

@@ -1,26 +1,49 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:intl/date_symbol_data_local.dart';
+import 'package:flutter/services.dart';
 import 'screens/tab1.dart';
 import 'screens/tab2.dart';
 import 'screens/tab3.dart';
+import 'musical.dart';
+import 'actor.dart';
 
 void main() async {
-  await initializeDateFormatting();
-  runApp(MyApp());
+  WidgetsFlutterBinding.ensureInitialized(); // Ensures async operations work before runApp
+
+  // Load data from JSON files
+  final String musicalJson = await rootBundle.loadString('assets/musical.json');
+  final List<dynamic> musicalData = json.decode(musicalJson);
+  final List<Musical> musicals = musicalData.map((item) => Musical.fromJson(item)).toList();
+
+  final String actorJson = await rootBundle.loadString('assets/actor.json');
+  final List<dynamic> actorData = json.decode(actorJson);
+  final List<Actor> actors = actorData.map((item) => Actor.fromJson(item)).toList();
+
+  runApp(MyApp(musicals: musicals, actors: actors));
 }
 
 class MyApp extends StatelessWidget {
+  final List<Musical> musicals;
+  final List<Actor> actors;
+
+  const MyApp({super.key, required this.musicals, required this.actors});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData(scaffoldBackgroundColor: Colors.white),
-      home: HomePage(),
+      home: HomePage(musicals: musicals, actors: actors),
     );
   }
 }
 
 class HomePage extends StatefulWidget {
+  final List<Musical> musicals;
+  final List<Actor> actors;
+
+  const HomePage({super.key, required this.musicals, required this.actors});
+
   @override
   _HomePageState createState() => _HomePageState();
 }
@@ -28,22 +51,27 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   int _currentIndex = 0;
 
-  // 각 탭의 화면
-  final List<Widget> _tabs = [
-    Tab1(), // tab1.dart의 클래스
-    Tab2(), // tab2.dart의 클래스
-    Tab3(), // tab3.dart의 클래스
-  ];
-
   @override
   Widget build(BuildContext context) {
+    final List<Widget> _tabs = [
+      Tab1(
+        musicals: widget.musicals,
+        actors: widget.actors,
+      ),
+      Tab2(
+        musicals: widget.musicals,
+        actors: widget.actors,
+      ),
+      Tab3(),
+    ];
+
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          "🦊ShowFOX",
-          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-        ),
-        backgroundColor: Colors.orangeAccent
+          title: const Text(
+            "🦊ShowFOX",
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          ),
+          backgroundColor: Colors.orangeAccent
       ),
       body: _tabs[_currentIndex],
       bottomNavigationBar: BottomNavigationBar(
@@ -58,7 +86,7 @@ class _HomePageState extends State<HomePage> {
         selectedItemColor: Colors.deepOrange,
         // unselectedIconTheme: IconThemeData(color: Colors.white),
         // selectedIconTheme: IconThemeData(color: Colors.deepOrange),
-        items: [
+        items: const [
           BottomNavigationBarItem(
               icon: Icon(Icons.list),
               label: "Musicals"

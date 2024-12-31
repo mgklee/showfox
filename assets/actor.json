@@ -6,7 +6,7 @@
     "debutWork": "뮤지컬〈오페라의 유령〉",
     "birthday": "1975.11.11",
     "company": "팜트리아일랜드",
-    "musicals": "명성황후",
+    "musicals": ["명성황후"],
     "profilePicture": "https://ticketimage.interpark.com/PlayDictionary/DATA/PlayDic/PlayDicUpload/040004/07/01/0400040701_3583_012.229.jpg"
   },
   {
@@ -16,7 +16,7 @@
     "debutWork": "뮤지컬〈라이온 킹〉",
     "birthday": "1982.02.22",
     "company": "씨엘엔컴퍼니",
-    "musicals": "명성황후, 광화문연가",
+    "musicals": ["명성황후", "광화문연가"],
     "profilePicture": "https://ticketimage.interpark.com/PlayDictionary/DATA/PlayDic/PlayDicUpload/040004/07/01/0400040701_4131_012.jpg"
   },
   {
@@ -26,7 +26,7 @@
     "debutWork": "뮤지컬〈오페라의 유령〉",
     "birthday": "1983.03.28",
     "company": "팜트리아일랜드",
-    "musicals": "명성황후, 광화문연가",
+    "musicals": ["명성황후", "광화문연가"],
     "profilePicture": "https://ticketimage.interpark.com/PlayDictionary/DATA/PlayDic/PlayDicUpload/040004/10/08/0400041008_22878_02622.gif"
   },
   {
@@ -36,7 +36,7 @@
     "debutWork": "뮤지컬〈화랑〉",
     "birthday": "1987.03.02",
     "company": "블루스테이지",
-    "musicals": "명성황후, 지저스 크라이스트 수퍼스타",
+    "musicals": ["명성황후", "지저스 크라이스트 수퍼스타"],
     "profilePicture": "https://ticketimage.interpark.com/PlayDictionary/DATA/PlayDic/PlayDicUpload/040004/10/03/0400041003_20750_02033.801.gif"
   },
   {
@@ -46,7 +46,7 @@
     "debutWork": "뮤지컬〈라이온 킹〉",
     "birthday": "1981.06.14",
     "company": "없음",
-    "musicals": "웃는남자, 지저스 크라이스트 수퍼스타",
+    "musicals": ["웃는남자", "지저스 크라이스트 수퍼스타"],
     "profilePicture": "https://ticketimage.interpark.com/PlayDictionary/DATA/PlayDic/PlayDicUpload/040004/07/01/0400040701_4004_014558.gif"
   },
   {
@@ -56,7 +56,7 @@
     "debutWork": "뮤지컬〈명성황후〉",
     "birthday": "1982.04.06",
     "company": "PL엔터테인먼트",
-    "musicals": "지킬앤하이드",
+    "musicals": ["지킬앤하이드"],
     "profilePicture": "https://ticketimage.interpark.com/PlayDictionary/DATA/PlayDic/PlayDicUpload/040004/07/01/0400040701_3871_013536.623.gif"
   },
   {
@@ -66,7 +66,7 @@
     "debutWork": "보이그룹 '동방신기'",
     "birthday": "1987.01.01",
     "company": "팜트리아일랜드",
-    "musicals": "알라딘",
+    "musicals": ["알라딘"],
     "profilePicture": "https://ticketimage.interpark.com/PlayDictionary/DATA/PlayDic/PlayDicUpload/040004/09/11/0400040911_18920_023.116.gif"
   },
   {
@@ -76,7 +76,7 @@
     "debutWork": "뮤지컬〈찰리 브라운〉",
     "birthday": "1984.10.25",
     "company": "이음엔터테인먼트",
-    "musicals": "시라노",
+    "musicals": ["시라노"],
     "profilePicture": "https://ticketimage.interpark.com/PlayDictionary/DATA/PlayDic/PlayDicUpload/040004/10/08/0400041008_22946_02848.gif"
   },
   {
@@ -86,7 +86,7 @@
     "debutWork": "SBS 5기 공채 탤런트",
     "birthday": "1969.11.28",
     "company": "나무엑터스",
-    "musicals": "스윙 데이즈_암호명 A",
+    "musicals": ["스윙 데이즈_암호명 A"],
     "profilePicture": "http://ticketimage.interpark.com/PlayDictionary/DATA/PlayDic/PlayDicUpload/040004/08/01/0400040801_5819_021509.gif"
   },
   {
@@ -96,7 +96,7 @@
     "debutWork": "걸그룹 '핑클'",
     "birthday": "1980.03.20",
     "company": "포트럭주식회사",
-    "musicals": "마타하리",
+    "musicals": ["마타하리"],
     "profilePicture": "http://ticketimage.interpark.com/PlayDictionary/DATA/PlayDic/PlayDicUpload/040004/07/01/0400040701_3727_011.jpg"
   },
   {
@@ -106,7 +106,7 @@
     "debutWork": "뮤지컬〈미스 사이공〉",
     "birthday": "1973.06.05",
     "company": "블루스테이지",
-    "musicals": "지저스 크라이스트 수퍼스타",
+    "musicals": ["지저스 크라이스트 수퍼스타"],
     "profilePicture": "http://ticketimage.interpark.com/PlayDictionary/DATA/PlayDic/PlayDicUpload/040004/08/02/0400040802_6515_023.416.gif"
   },
   {
@@ -116,7 +116,7 @@
     "debutWork": "정규 1집〈가을 우체국 앞에서〉",
     "birthday": "1972.02.03",
     "company": "디컴퍼니",
-    "musicals": "광화문연가",
+    "musicals": ["광화문연가"],
     "profilePicture": "http://ticketimage.interpark.com/PlayDictionary/DATA/PlayDic/PlayDicUpload/040004/09/09/0400040909_17523_02512.gif"
   },
   {
@@ -126,7 +126,7 @@
     "debutWork": "영화〈써니〉",
     "birthday": "1988.12.24",
     "company": "프레인TPC",
-    "musicals": "고스트 베이커리",
+    "musicals": ["고스트 베이커리"],
     "profilePicture": "http://ticketimage.interpark.com/PlayDictionary/DATA/PlayDic/PlayDicUpload/040004/11/04/0400041104_25261_02.758.gif"
   }
 ]
