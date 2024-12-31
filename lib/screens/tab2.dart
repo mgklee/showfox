@@ -1,14 +1,22 @@
+import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import '../musical.dart';
 import '../actor.dart';
 
 class Tab2 extends StatefulWidget {
+  final List<Musical> musicals;
   final List<Actor> actors;
   final Set<String> savedActors;
-  final VoidCallback onSwitchToTab1;
 
-  const Tab2({super.key, required this.actors, required this.savedActors, required this.onSwitchToTab1});
+  const Tab2({
+    super.key,
+    required this.musicals,
+    required this.actors,
+    required this.savedActors,
+  });
 
   @override
   _Tab2State createState() => _Tab2State();
@@ -33,6 +41,85 @@ class _Tab2State extends State<Tab2> {
     );
   }
 
+  void _showMusicalDetails(BuildContext context, Musical musical) {
+    final NumberFormat currencyFormat = NumberFormat("#,###");
+    List<Widget> actors = [];
+
+    for (int i = 0; i < musical.actors.length; i++) {
+      Iterable<Actor> match = widget.actors.where(
+              (element) => element.name == musical.actors[i]
+      );
+
+      if (match.isEmpty) {
+        actors.add(Text(musical.actors[i]));
+      } else {
+        for (Actor actor in match) {
+          actors.add(
+            GestureDetector(
+              onTap: () {
+                Navigator.of(context).pop();
+                _showActorDetails(context, actor);
+              },
+              child: Text(musical.actors[i]),
+            ),
+          );
+        }
+      }
+      if (i+1 < musical.actors.length) {
+        actors.add(const Text(", "));
+      }
+    }
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(
+            "${musical.title} 상세정보",
+            style: const TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold
+            ),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildDetailRow("장소", Text(musical.place)),
+              _buildDetailRow("공연기간", Text("${musical.firstDate} ~ ${musical.lastDate}")),
+              _buildDetailRow("공연시간", Text("${musical.duration}분 (인터미션 20분 포함)")),
+              _buildDetailRow("관람연령", Text("${musical.ageLimit}세 이상 관람가능")),
+              _buildDetailRow("가격", Text("${currencyFormat.format(musical.minPrice)} ~ ${currencyFormat.format(musical.maxPrice)}원")),
+              _buildDetailRow("캐스팅", Wrap(children: actors)),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+              },
+              child: const Text('닫기'),
+            ),
+            TextButton(
+              onPressed: () {
+                _launchURL(musical.map);
+                Navigator.of(context).pop();
+              },
+              child: const Text('지도 보기'),
+            ),
+            TextButton(
+              onPressed: () {
+                _launchURL(musical.url); // Open the musical's URL
+                Navigator.of(context).pop();
+              },
+              child: const Text('예매하기'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   void _showActorDetails(BuildContext context, Actor actor) async {
     AssetBundle bundle = DefaultAssetBundle.of(context);
     final assetManifest = await AssetManifest.loadFromAssetBundle(bundle);
@@ -49,15 +136,25 @@ class _Tab2State extends State<Tab2> {
     List<Widget> musicals = [];
 
     for (int i = 0; i < actor.musicals.length; i++) {
-      musicals.add(
-        GestureDetector(
-          onTap: () {
-            Navigator.of(context).pop();
-            widget.onSwitchToTab1();
-          },
-          child: Text(actor.musicals[i])
-        )
+      Iterable<Musical> match = widget.musicals.where(
+              (element) => element.title == actor.musicals[i]
       );
+
+      if (match.isEmpty) {
+        musicals.add(Text(actor.musicals[i]));
+      } else {
+        for (Musical musical in match) {
+          musicals.add(
+            GestureDetector(
+              onTap: () {
+                Navigator.of(context).pop();
+                _showMusicalDetails(context, musical);
+              },
+              child: Text(actor.musicals[i]),
+            ),
+          );
+        }
+      }
       if (i+1 < actor.musicals.length) {
         musicals.add(const Text(", "));
       }
@@ -207,5 +304,14 @@ class _Tab2State extends State<Tab2> {
         },
       ),
     );
+  }
+
+  void _launchURL(String url) async {
+    final uri = Uri.parse(url);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } else {
+      throw 'Could not launch $url';
+    }
   }
 }

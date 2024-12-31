@@ -58,21 +58,13 @@ class _HomePageState extends State<HomePage> {
     final List<Widget> _tabs = [
       Tab1(
         musicals: widget.musicals,
+        actors: widget.actors,
         savedMusicals: savedMusicals,
-        onSwitchToTab2: () {
-          setState(() {
-            _currentIndex = 1; // Switch to Tab 2
-          });
-        },
       ),
       Tab2(
+        musicals: widget.musicals,
         actors: widget.actors,
         savedActors: savedActors,
-        onSwitchToTab1: () {
-          setState(() {
-            _currentIndex = 0; // Switch to Tab 1
-          });
-        },
       ),
       Tab3(),
     ];

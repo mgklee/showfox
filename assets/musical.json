@@ -106,7 +106,7 @@
     "ageLimit": 8,
     "minPrice": 60000,
     "maxPrice": 150000,
-    "actors": ["마이클리", "박은태", "한지상", "윤형렬", "백형훈", "김보경", "장은아", "정유지"],
+    "actors": ["마이클 리", "박은태", "한지상", "윤형렬", "백형훈", "김보경", "장은아", "정유지"],
     "map": "https://map.naver.com/p/entry/place/33431886?c=15.00,0,0,0,dh",
     "url": "https://tickets.interpark.com/goods/24012950?GoodsCode=24012950",
     "thumbnail": "https://ticketimage.interpark.com/Play/image/large/24/24012950_p.gif"
