@@ -17,34 +17,66 @@ class Tab3 extends StatefulWidget {
 class _Tab3State extends State<Tab3> {
   late Future<List<Musical>> musicals;
   List<String> savedMusicals = [];
+  Map<DateTime, List<String>> musicalEvents = {};
+  List<String> savedActors = [];
+  Map<DateTime, List<String>> actorEvents = {};
+  Map<DateTime, List<String>> allEvents = {};
+  Map<DateTime, List<String>> musicalAndActorEvents = {};
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
   Map<DateTime, List<String>> events = {};
-  TextEditingController _eventController = TextEditingController();
+  final TextEditingController _eventController = TextEditingController();
   late final ValueNotifier<List<String>> _selectedEvents;
   late final SharedPreferences prefs;
   bool buttonMusicalPressed = false;
   bool buttonActorPressed = false;
 
   Future<List<Musical>> loadMusicalData() async {
-    final String response = await rootBundle.loadString('../../assets/musical.json');
+    final String response = await rootBundle.loadString('assets/musical.json');
     final List<dynamic> data = json.decode(response);
     return data.map((item) => Musical.fromJson(item as Map<String, dynamic>)).toList();
   }
 
-  Future<List<String>> getPreviousSavedMusicals() async {
+  Future<void> getAllEvents() async {
+    List<Musical>musicalsForEvent = await loadMusicalData();
+    Map<DateTime, List<String>> newEvents = {};
+    for(var musical in musicalsForEvent) {
+      DateTime startDate = changeStringToDateTime(musical.firstDate);
+      DateTime endDate = changeStringToDateTime(musical.lastDate);
+      String title = musical.title;
+
+      if (!newEvents.containsKey(startDate)) {
+        newEvents[startDate] = [];
+      }
+      newEvents[startDate]!.add("[$title] 시작일");
+
+      if (!newEvents.containsKey(endDate)) {
+        newEvents[endDate] = [];
+      }
+      newEvents[endDate]!.add("[$title] 마감일");
+    }
+    allEvents = newEvents;
+  }
+
+  Future<void> getPref() async {
     prefs = await SharedPreferences.getInstance();
+  }
+
+  List<String> getFavoriteMusical() {
     final List<String>? previousSavedMusicals = prefs.getStringList('savedMusicals');
+    log("From getFavoriteMusical $previousSavedMusicals");
     return previousSavedMusicals ?? [];
   }
 
-  void getSavedMusicals() async {
-    savedMusicals = await getPreviousSavedMusicals();
+  void getFavoriteMusicalWait() {
+    log("getFavoriteMusicalWait started");
+    savedMusicals = getFavoriteMusical();
   }
 
   // Musical JSON read, add musical schedule to Event list
-  Future<void> makeEventFromSavedMusical() async {
+  Future<void> makeEventFromFavoriteMusical() async {
     List<Musical>musicalsForEvent = await loadMusicalData();
+    log("From makeEventFromFavoriteMusical ${musicalsForEvent}");
     Map<DateTime, List<String>> newEvents = {};
 
     for(var musical in musicalsForEvent) {
@@ -56,17 +88,90 @@ class _Tab3State extends State<Tab3> {
         if (!newEvents.containsKey(startDate)) {
           newEvents[startDate] = [];
         }
-        newEvents[startDate]!.add("[" + title + "] 시작일");
+        newEvents[startDate]!.add("[$title] 시작일");
 
         if (!newEvents.containsKey(endDate)) {
           newEvents[endDate] = [];
         }
-        newEvents[endDate]!.add("[" + title + "] 마감일");
+        newEvents[endDate]!.add("[$title] 마감일");
       }
     }
+    log("Result from makeEventFromSavedActor: ${newEvents}");
+    setState(() {
+      musicalEvents = newEvents;
+    });
+  }
+
+  List<String> getFavoriteActorsMusical() {
+    final List<String>? previousSavedMusicals = prefs.getStringList('savedActors');
+    return previousSavedMusicals ?? [];
+  }
+
+  void getFavoriteActorsMusicalWait() {
+    log("getFavoriteActorsMusicalWait Started");
+    savedActors = getFavoriteActorsMusical();
+  }
+
+  // Musical JSON read, add musical schedule to Event list
+  Future<void> makeEventFromSavedActor() async {
+    log("makeEventFromSavedActor Started");
+    List<Musical>musicalsForEvent = await loadMusicalData();
+    Map<DateTime, List<String>> newEvents = {};
+
+    for(var musical in musicalsForEvent) {
+      bool actorAppearsInMusical = false;
+      for(var actor in savedActors) {
+        if (musical.actors.contains(actor)) {
+          actorAppearsInMusical = true;
+        }
+      }
+      if (actorAppearsInMusical){
+        DateTime startDate = changeStringToDateTime(musical.firstDate);
+        DateTime endDate = changeStringToDateTime(musical.lastDate);
+        String title = musical.title;
+
+        if (!newEvents.containsKey(startDate)) {
+          newEvents[startDate] = [];
+        }
+        newEvents[startDate]!.add("[$title] 시작일");
+
+        if (!newEvents.containsKey(endDate)) {
+          newEvents[endDate] = [];
+        }
+        newEvents[endDate]!.add("[$title] 마감일");
+      }
+    }
+    log("Result from makeEventFromSavedActor: ${newEvents}");
 
     setState(() {
-      events = newEvents;
+      actorEvents = newEvents;
+    });
+  }
+
+  Future<void> getEventFromFavorite() async {
+    getAllEvents();
+    getFavoriteMusicalWait();
+    getFavoriteActorsMusicalWait();
+    makeEventFromFavoriteMusical();
+    makeEventFromSavedActor();
+  }
+
+  Future<void> makeEventFromBothMusicalAndActor() async {
+    log("BOTH STARTED");
+    Map<DateTime, List<String>> newEvents = {};
+    musicalEvents.forEach((date, musicalList){
+      if (actorEvents.containsKey(date)){
+        List<String> actorList = actorEvents[date] ?? [];
+        List<String> commonEvents = musicalList.where((event) => actorList.contains(event)).toList();
+        if (commonEvents.isNotEmpty) {
+          newEvents[date] = commonEvents;
+        }
+      }
+    });
+
+    log("Result from makeEventFromBothMusicalAndActor: ${newEvents}");
+    setState(() {
+      musicalAndActorEvents = newEvents;
     });
   }
 
@@ -76,8 +181,12 @@ class _Tab3State extends State<Tab3> {
     _selectedDay = _focusedDay;
     _selectedEvents = ValueNotifier(_getEventsForDay(_selectedDay!));
     musicals = loadMusicalData();
-    getSavedMusicals();
-    makeEventFromSavedMusical();
+    getPref().then((_){
+      getEventFromFavorite().then((_){
+        makeEventFromBothMusicalAndActor();
+        events = allEvents;
+      });
+    });
   }
 
   @override
@@ -163,20 +272,86 @@ class _Tab3State extends State<Tab3> {
       body: Column(
         children: [
           CheckboxListTile(
-            title: const Text("원하는 뮤지컬 골라보기"),
+            title: const Text("원하는 뮤지컬만 골라 보기"),
             value: buttonMusicalPressed,
-            onChanged: (bool? newValue) {
-              buttonMusicalPressed = newValue!;
+            onChanged: (bool? value) {
+              buttonMusicalPressed = value ?? false;
+              if (buttonMusicalPressed){
+                if(buttonActorPressed){
+                  setState(() {
+                    events = musicalAndActorEvents;
+                    _selectedEvents.value =
+                        _getEventsForDay(_selectedDay ?? _focusedDay);
+                  });
+                }
+                else{
+                  setState(() {
+                    events = musicalEvents;
+                    _selectedEvents.value =
+                        _getEventsForDay(_selectedDay ?? _focusedDay);
+                  });
+                }
+              }
+              else {
+                if(buttonActorPressed){
+                  setState(() {
+                    events = actorEvents;
+                    _selectedEvents.value =
+                        _getEventsForDay(_selectedDay ?? _focusedDay);
+                  });
+                }
+                else{
+                  setState(() {
+                    events = allEvents;
+                    _selectedEvents.value =
+                        _getEventsForDay(_selectedDay ?? _focusedDay);
+                  });
+                }
+              }
             },
             controlAffinity: ListTileControlAffinity.leading,  //  <-- leading Checkbox
+            selected: buttonMusicalPressed,
           ),
           CheckboxListTile(
-            title: const Text("원하는 배우 골라보기"),
+            title: const Text("원하는 배우만 골라 보기"),
             value: buttonActorPressed,
-            onChanged: (bool? newValue) {
-              buttonActorPressed = !buttonActorPressed;
+            onChanged: (bool? value) {
+              buttonActorPressed = value ?? false;
+              if (buttonActorPressed){
+                if(buttonMusicalPressed){
+                  setState(() {
+                    events = musicalAndActorEvents;
+                    _selectedEvents.value =
+                        _getEventsForDay(_selectedDay ?? _focusedDay);
+                  });
+                }
+                else{
+                  setState(() {
+                    events = actorEvents;
+                    _selectedEvents.value =
+                        _getEventsForDay(_selectedDay ?? _focusedDay);
+                  });
+                }
+              }
+              else {
+                if(buttonMusicalPressed){
+                  setState(() {
+                    events = musicalEvents;
+                    _selectedEvents.value =
+                        _getEventsForDay(_selectedDay ?? _focusedDay);
+                  });
+                }
+                else{
+                  setState(() {
+                    events = allEvents;
+                    _selectedEvents.value =
+                        _getEventsForDay(_selectedDay ?? _focusedDay);
+                  });
+                }
+              }
             },
             controlAffinity: ListTileControlAffinity.leading,  //  <-- leading Checkbox
+            selected: buttonActorPressed,
           ),
           TableCalendar(
             locale: 'ko_KR',
