@@ -50,8 +50,6 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   int _currentIndex = 0;
-  final Set<String> savedMusicals = {}; // Shared state for saved musicals
-  final Set<String> savedActors = {};   // Shared state for saved actors
 
   @override
   Widget build(BuildContext context) {
@@ -59,12 +57,10 @@ class _HomePageState extends State<HomePage> {
       Tab1(
         musicals: widget.musicals,
         actors: widget.actors,
-        savedMusicals: savedMusicals,
       ),
       Tab2(
         musicals: widget.musicals,
         actors: widget.actors,
-        savedActors: savedActors,
       ),
       Tab3(),
     ];

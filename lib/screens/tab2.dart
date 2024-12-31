@@ -3,26 +3,37 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../musical.dart';
 import '../actor.dart';
 
 class Tab2 extends StatefulWidget {
   final List<Musical> musicals;
   final List<Actor> actors;
-  final Set<String> savedActors;
 
-  const Tab2({
-    super.key,
-    required this.musicals,
-    required this.actors,
-    required this.savedActors,
-  });
+  const Tab2({super.key, required this.musicals, required this.actors,});
 
   @override
   _Tab2State createState() => _Tab2State();
 }
 
 class _Tab2State extends State<Tab2> {
+  List<String> savedActors = [];
+  late SharedPreferences prefs;
+
+  Future<void> initSharedPreferences() async {
+    prefs = await SharedPreferences.getInstance();
+    setState(() {
+      savedActors = prefs.getStringList('savedActors') ?? [];
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    initSharedPreferences();
+  }
+
   Widget _buildDetailRow(String label, value) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -47,7 +58,7 @@ class _Tab2State extends State<Tab2> {
 
     for (int i = 0; i < musical.actors.length; i++) {
       Iterable<Actor> match = widget.actors.where(
-              (element) => element.name == musical.actors[i]
+        (element) => element.name == musical.actors[i]
       );
 
       if (match.isEmpty) {
@@ -65,6 +76,7 @@ class _Tab2State extends State<Tab2> {
           );
         }
       }
+
       if (i+1 < musical.actors.length) {
         actors.add(const Text(", "));
       }
@@ -77,8 +89,8 @@ class _Tab2State extends State<Tab2> {
           title: Text(
             "${musical.title} 상세정보",
             style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold
+              fontSize: 20,
+              fontWeight: FontWeight.bold
             ),
           ),
           content: Column(
@@ -130,14 +142,14 @@ class _Tab2State extends State<Tab2> {
 
     // Filter out images in the dynamically chosen directory
     final imagePaths = assets
-        .where((String imagePath) => imagePath.startsWith(directory))
-        .toList();
+      .where((String imagePath) => imagePath.startsWith(directory))
+      .toList();
 
     List<Widget> musicals = [];
 
     for (int i = 0; i < actor.musicals.length; i++) {
       Iterable<Musical> match = widget.musicals.where(
-              (element) => element.title == actor.musicals[i]
+        (element) => element.title == actor.musicals[i]
       );
 
       if (match.isEmpty) {
@@ -155,6 +167,7 @@ class _Tab2State extends State<Tab2> {
           );
         }
       }
+
       if (i+1 < actor.musicals.length) {
         musicals.add(const Text(", "));
       }
@@ -163,55 +176,86 @@ class _Tab2State extends State<Tab2> {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(
-            "${actor.name} 상세정보",
-            style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold
-            ),
-          ),
-          content: SizedBox(
-            width: MediaQuery.of(context).size.width * 0.8, // 80% of screen width
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  CarouselSlider(
-                    items: imagePaths.map((imagePath) {
-                      return ClipRRect(
-                        borderRadius: BorderRadius.circular(10),
-                        child: Image.asset(
-                          imagePath,
-                          fit: BoxFit.cover,
-                        ),
-                      );
-                    }).toList(),
-                    options: CarouselOptions(
-                      height: 400,
-                      enlargeCenterPage: true,
-                      enableInfiniteScroll: true,
-                      autoPlay: true,
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  _buildDetailRow("생년월일", Text(actor.birthday)),
-                  _buildDetailRow("데뷔", Text("${actor.debutYear}년 ${actor.debutWork}")),
-                  _buildDetailRow("소속사", Text(actor.company)),
-                  _buildDetailRow("작품", Wrap(children: musicals)),
-                ],
+        int currentIndex = 0;
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return AlertDialog(
+              title: Text(
+                "${actor.name} 상세정보",
+                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(); // Close the dialog
-              },
-              child: const Text('닫기'),
-            ),
-          ],
+              content: SizedBox(
+                width: MediaQuery.of(context).size.width * 0.8, // 80% of screen width
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          CarouselSlider(
+                            items: imagePaths.map((imagePath) {
+                              return ClipRRect(
+                                borderRadius: BorderRadius.circular(10),
+                                child: Image.asset(
+                                  imagePath,
+                                  fit: BoxFit.cover,
+                                ),
+                              );
+                            }).toList(),
+                            options: CarouselOptions(
+                              height: MediaQuery.of(context).size.height * 0.5,
+                              onPageChanged: (index, reason) {
+                                setState(() {
+                                  currentIndex = index;
+                                });
+                              },
+                              enlargeCenterPage: true,
+                              enableInfiniteScroll: true,
+                              autoPlay: true,
+                            ),
+                          ),
+                          Positioned(
+                            bottom: 5,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: imagePaths.asMap().entries.map((entry) {
+                                return Container(
+                                  width: 8,
+                                  height: 8,
+                                  margin: const EdgeInsets.all(2),
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: Colors.white.withValues(
+                                      alpha: currentIndex == entry.key ? 1 : 0.5,
+                                    ),
+                                  ),
+                                );
+                              }).toList(),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 20),
+                      _buildDetailRow("생년월일", Text(actor.birthday)),
+                      _buildDetailRow("데뷔", Text("${actor.debutYear}년 ${actor.debutWork}")),
+                      _buildDetailRow("소속사", Text(actor.company)),
+                      _buildDetailRow("작품", Wrap(children: musicals)),
+                    ],
+                  ),
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop(); // Close the dialog
+                  },
+                  child: const Text('닫기'),
+                ),
+              ],
+            );
+          },
         );
       },
     );
@@ -219,90 +263,85 @@ class _Tab2State extends State<Tab2> {
 
   @override
   Widget build(BuildContext context) {
-    // Get the screen width
     final screenWidth = MediaQuery.of(context).size.width;
-
-    // Define the size of each item (including spacing)
     const double itemWidth = 150;
-
-    // Calculate the number of items per row
     final crossAxisCount = ((screenWidth - 40) / itemWidth).floor();
 
-    return Padding(
-      padding: const EdgeInsets.all(20),
-      child: GridView.builder(
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: crossAxisCount, // Dynamic number of items per row
-          crossAxisSpacing: 10, // Horizontal spacing between items
-          mainAxisSpacing: 30, // Vertical spacing between items
-        ),
-        itemCount: widget.actors.length,
-        itemBuilder: (context, index) {
-          final actor = widget.actors[index];
-          final isSaved = widget.savedActors.contains(actor.name); // Check if it's saved
-
-          return Column(
-            children: [
-              GestureDetector(
-                onTap: () => _showActorDetails(context, actor),
-                child: Stack(
-                  children: [
-                    ClipOval(
-                      child: Image.network(
-                        actor.profilePicture,
-                        width: 100,
-                        height: 100,
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                    Positioned(
-                      top: 0,
-                      right: 0,
-                      child: GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            if (isSaved) {
-                              widget.savedActors.remove(actor.name);
-                            } else {
-                              widget.savedActors.add(actor.name);
-                            }
-
-                            ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                width: 300,
-                                content: Text(isSaved ? '저장 해제됨' : '저장됨'),
-                                duration: const Duration(seconds: 1), // Short duration for quick response
-                                behavior: SnackBarBehavior.floating, // Makes it appear above other content
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                              ),
-                            );
-                          });
-                        },
-                        child: Icon(
-                          isSaved ? Icons.favorite : Icons.favorite_border,
-                          color: isSaved ? Colors.red : Colors.grey,
-                          size: 28,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 10),
-              Text(
-                actor.name,
-                style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold
-                ),
-              ),
-            ],
-          );
-        },
+    return GridView.builder(
+      physics: const BouncingScrollPhysics(), // Enables smooth scrolling
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: crossAxisCount, // Dynamic number of items per row
+        // crossAxisSpacing: 10, // Horizontal spacing between items
+        // mainAxisSpacing: 30, // Vertical spacing between items
+        childAspectRatio: 0.9,
       ),
+      itemCount: widget.actors.length,
+      itemBuilder: (context, index) {
+        final actor = widget.actors[index];
+        final isSaved = savedActors.contains(actor.name); // Check if it's saved
+        return Column(
+          children: [
+            const SizedBox(height: 20),
+            GestureDetector(
+              onTap: () => _showActorDetails(context, actor),
+              child: Stack(
+                children: [
+                  ClipOval(
+                    child: Image.network(
+                      actor.profilePicture,
+                      width: 100,
+                      height: 100,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                  Positioned(
+                    top: 0,
+                    right: 0,
+                    child: GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          if (isSaved) {
+                            savedActors.remove(actor.name);
+                          } else {
+                            savedActors.add(actor.name);
+                          }
+                          prefs.setStringList('savedActors', savedActors);
+
+                          ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              width: 300,
+                              content: Text(isSaved ? '저장 해제됨' : '저장됨'),
+                              duration: const Duration(seconds: 1), // Short duration for quick response
+                              behavior: SnackBarBehavior.floating, // Makes it appear above other content
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                          );
+                        });
+                      },
+                      child: Icon(
+                        isSaved ? Icons.favorite : Icons.favorite_border,
+                        color: isSaved ? Colors.red : Colors.grey,
+                        size: 28,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              actor.name,
+              style: const TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 
