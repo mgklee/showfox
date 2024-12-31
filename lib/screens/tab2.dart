@@ -11,7 +11,11 @@ class Tab2 extends StatefulWidget {
   final List<Musical> musicals;
   final List<Actor> actors;
 
-  const Tab2({super.key, required this.musicals, required this.actors,});
+  const Tab2({
+    super.key,
+    required this.musicals,
+    required this.actors,
+  });
 
   @override
   _Tab2State createState() => _Tab2State();
@@ -57,9 +61,8 @@ class _Tab2State extends State<Tab2> {
     List<Widget> actors = [];
 
     for (int i = 0; i < musical.actors.length; i++) {
-      Iterable<Actor> match = widget.actors.where(
-        (element) => element.name == musical.actors[i]
-      );
+      Iterable<Actor> match =
+          widget.actors.where((element) => element.name == musical.actors[i]);
 
       if (match.isEmpty) {
         actors.add(Text(musical.actors[i]));
@@ -77,7 +80,7 @@ class _Tab2State extends State<Tab2> {
         }
       }
 
-      if (i+1 < musical.actors.length) {
+      if (i + 1 < musical.actors.length) {
         actors.add(const Text(", "));
       }
     }
@@ -88,20 +91,22 @@ class _Tab2State extends State<Tab2> {
         return AlertDialog(
           title: Text(
             "${musical.title} 상세정보",
-            style: const TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold
-            ),
+            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildDetailRow("장소", Text(musical.place)),
-              _buildDetailRow("공연기간", Text("${musical.firstDate} ~ ${musical.lastDate}")),
-              _buildDetailRow("공연시간", Text("${musical.duration}분 (인터미션 20분 포함)")),
+              _buildDetailRow(
+                  "공연기간", Text("${musical.firstDate} ~ ${musical.lastDate}")),
+              _buildDetailRow(
+                  "공연시간", Text("${musical.duration}분 (인터미션 20분 포함)")),
               _buildDetailRow("관람연령", Text("${musical.ageLimit}세 이상 관람가능")),
-              _buildDetailRow("가격", Text("${currencyFormat.format(musical.minPrice)} ~ ${currencyFormat.format(musical.maxPrice)}원")),
+              _buildDetailRow(
+                  "가격",
+                  Text(
+                      "${currencyFormat.format(musical.minPrice)} ~ ${currencyFormat.format(musical.maxPrice)}원")),
               _buildDetailRow("캐스팅", Wrap(children: actors)),
             ],
           ),
@@ -142,15 +147,14 @@ class _Tab2State extends State<Tab2> {
 
     // Filter out images in the dynamically chosen directory
     final imagePaths = assets
-      .where((String imagePath) => imagePath.startsWith(directory))
-      .toList();
+        .where((String imagePath) => imagePath.startsWith(directory))
+        .toList();
 
     List<Widget> musicals = [];
 
     for (int i = 0; i < actor.musicals.length; i++) {
-      Iterable<Musical> match = widget.musicals.where(
-        (element) => element.title == actor.musicals[i]
-      );
+      Iterable<Musical> match = widget.musicals
+          .where((element) => element.title == actor.musicals[i]);
 
       if (match.isEmpty) {
         musicals.add(Text(actor.musicals[i]));
@@ -168,7 +172,7 @@ class _Tab2State extends State<Tab2> {
         }
       }
 
-      if (i+1 < actor.musicals.length) {
+      if (i + 1 < actor.musicals.length) {
         musicals.add(const Text(", "));
       }
     }
@@ -182,10 +186,12 @@ class _Tab2State extends State<Tab2> {
             return AlertDialog(
               title: Text(
                 "${actor.name} 상세정보",
-                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                style:
+                    const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
               content: SizedBox(
-                width: MediaQuery.of(context).size.width * 0.8, // 80% of screen width
+                width: MediaQuery.of(context).size.width *
+                    0.8, // 80% of screen width
                 child: SingleChildScrollView(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
@@ -228,7 +234,8 @@ class _Tab2State extends State<Tab2> {
                                   decoration: BoxDecoration(
                                     shape: BoxShape.circle,
                                     color: Colors.white.withValues(
-                                      alpha: currentIndex == entry.key ? 1 : 0.5,
+                                      alpha:
+                                          currentIndex == entry.key ? 1 : 0.5,
                                     ),
                                   ),
                                 );
@@ -239,7 +246,8 @@ class _Tab2State extends State<Tab2> {
                       ),
                       const SizedBox(height: 20),
                       _buildDetailRow("생년월일", Text(actor.birthday)),
-                      _buildDetailRow("데뷔", Text("${actor.debutYear}년 ${actor.debutWork}")),
+                      _buildDetailRow(
+                          "데뷔", Text("${actor.debutYear}년 ${actor.debutWork}")),
                       _buildDetailRow("소속사", Text(actor.company)),
                       _buildDetailRow("작품", Wrap(children: musicals)),
                     ],
@@ -267,81 +275,101 @@ class _Tab2State extends State<Tab2> {
     const double itemWidth = 150;
     final crossAxisCount = ((screenWidth - 40) / itemWidth).floor();
 
-    return GridView.builder(
-      physics: const BouncingScrollPhysics(), // Enables smooth scrolling
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: crossAxisCount, // Dynamic number of items per row
-        // crossAxisSpacing: 10, // Horizontal spacing between items
-        // mainAxisSpacing: 30, // Vertical spacing between items
-        childAspectRatio: 0.9,
-      ),
-      itemCount: widget.actors.length,
-      itemBuilder: (context, index) {
-        final actor = widget.actors[index];
-        final isSaved = savedActors.contains(actor.name); // Check if it's saved
-        return Column(
-          children: [
-            const SizedBox(height: 20),
-            GestureDetector(
-              onTap: () => _showActorDetails(context, actor),
-              child: Stack(
-                children: [
-                  ClipOval(
-                    child: Image.network(
-                      actor.profilePicture,
-                      width: 100,
-                      height: 100,
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                  Positioned(
-                    top: 0,
-                    right: 0,
-                    child: GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          if (isSaved) {
-                            savedActors.remove(actor.name);
-                          } else {
-                            savedActors.add(actor.name);
-                          }
-                          prefs.setStringList('savedActors', savedActors);
-
-                          ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              width: 300,
-                              content: Text(isSaved ? '저장 해제됨' : '저장됨'),
-                              duration: const Duration(seconds: 1), // Short duration for quick response
-                              behavior: SnackBarBehavior.floating, // Makes it appear above other content
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
+    return Scaffold(
+      body: CustomScrollView(
+        physics: const BouncingScrollPhysics(), // Enables smooth scrolling
+        slivers: [
+          SliverPadding(
+            padding: const EdgeInsets.all(20),
+            sliver: SliverGrid(
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount:
+                    crossAxisCount, // Dynamic number of items per row
+                crossAxisSpacing: 10, // Horizontal spacing between items
+                mainAxisSpacing: 20, // Vertical spacing between items
+                childAspectRatio: 0.9,
+              ),
+              delegate: SliverChildBuilderDelegate(
+                (BuildContext context, int index) {
+                  final actor = widget.actors[index];
+                  final isSaved =
+                      savedActors.contains(actor.name); // Check if it's saved
+                  return Column(
+                    children: [
+                      const SizedBox(height: 20),
+                      GestureDetector(
+                        onTap: () => _showActorDetails(context, actor),
+                        child: Stack(
+                          children: [
+                            ClipOval(
+                              child: Image.network(
+                                actor.profilePicture,
+                                width: 100,
+                                height: 100,
+                                fit: BoxFit.cover,
                               ),
                             ),
-                          );
-                        });
-                      },
-                      child: Icon(
-                        isSaved ? Icons.favorite : Icons.favorite_border,
-                        color: isSaved ? Colors.red : Colors.grey,
-                        size: 28,
+                            Positioned(
+                              top: 0,
+                              right: 0,
+                              child: GestureDetector(
+                                onTap: () {
+                                  setState(() {
+                                    if (isSaved) {
+                                      savedActors.remove(actor.name);
+                                    } else {
+                                      savedActors.add(actor.name);
+                                    }
+                                    prefs.setStringList(
+                                        'savedActors', savedActors);
+
+                                    ScaffoldMessenger.of(context)
+                                        .hideCurrentSnackBar();
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        width: 300,
+                                        content:
+                                            Text(isSaved ? '저장 해제됨' : '저장됨'),
+                                        duration: const Duration(
+                                            seconds:
+                                                1), // Short duration for quick response
+                                        behavior: SnackBarBehavior
+                                            .floating, // Makes it appear above other content
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                        ),
+                                      ),
+                                    );
+                                  });
+                                },
+                                child: Icon(
+                                  isSaved
+                                      ? Icons.favorite
+                                      : Icons.favorite_border,
+                                  color: isSaved ? Colors.red : Colors.grey,
+                                  size: 28,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                  ),
-                ],
+                      const SizedBox(height: 10),
+                      Text(
+                        actor.name,
+                        style: const TextStyle(
+                            fontSize: 20, fontWeight: FontWeight.bold),
+                      ),
+                    ],
+                  );
+                },
+                childCount: widget.actors.length,
               ),
             ),
-            const SizedBox(height: 10),
-            Text(
-              actor.name,
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold
-              ),
-            ),
-          ],
-        );
-      },
+          ),
+        ],
+      ),
     );
   }
 
