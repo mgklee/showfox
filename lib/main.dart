@@ -56,7 +56,7 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    final List<Widget> _tabs = [
+    final List<Widget> tabs = [
       Tab1(
         musicals: widget.musicals,
         actors: widget.actors,
@@ -76,7 +76,7 @@ class _HomePageState extends State<HomePage> {
           ),
           backgroundColor: Colors.orangeAccent
       ),
-      body: _tabs[_currentIndex],
+      body: tabs[_currentIndex],
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: Colors.orangeAccent,
         currentIndex: _currentIndex,
