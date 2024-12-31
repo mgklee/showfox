@@ -152,6 +152,7 @@ class _ActorTabState extends State<Tab2> {
   }
 
   @override
+  @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     const double itemWidth = 150;
@@ -169,80 +170,107 @@ class _ActorTabState extends State<Tab2> {
         }
 
         final actorList = snapshot.data!;
-        return Padding(
-          padding: const EdgeInsets.all(20),
-          child: GridView.builder(
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: crossAxisCount, // Dynamic number of items per row
-              crossAxisSpacing: 10,
-              mainAxisSpacing: 30,
-            ),
-            itemCount: actorList.length,
-            itemBuilder: (context, index) {
-              final actor = actorList[index];
-              final isSaved = savedActors.contains(actor.name);
 
-              return Column(
-                children: [
-                  GestureDetector(
-                    onTap: () {
-                      _showActorDetails(context, actor);
-                    },
-                    child: Stack(
-                      children: [
-                        ClipOval(
-                          child: Image.network(
-                            actor.profilePicture,
-                            width: 100,
-                            height: 100,
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                        Positioned(
-                          top: 0,
-                          right: 0,
-                          child: GestureDetector(
+        return Scaffold(
+          body: CustomScrollView(
+            slivers: [
+              // const SliverAppBar(
+              //   pinned: false,
+              //   expandedHeight: 100.0,
+              //   flexibleSpace: FlexibleSpaceBar(
+              //     background: Image(
+              //       image: AssetImage('assets/images/sliver.png'),
+              //       fit: BoxFit.cover,
+              //     ),
+              //     title: Text(\\
+              //     ),
+              //   ),
+              // ),
+              SliverPadding(
+                padding: const EdgeInsets.all(30),
+                sliver: SliverGrid(
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: crossAxisCount, // 한 줄에 표시할 항목 수
+                    crossAxisSpacing: 10,
+                    mainAxisSpacing: 30,
+                  ),
+                  delegate: SliverChildBuilderDelegate(
+                    (BuildContext context, int index) {
+                      final actor = actorList[index];
+                      final isSaved = savedActors.contains(actor.name);
+
+                      return Column(
+                        children: [
+                          GestureDetector(
                             onTap: () {
-                              setState(() {
-                                if (isSaved) {
-                                  savedActors.remove(actor.name);
-                                } else {
-                                  savedActors.add(actor.name);
-                                }
-                                prefs.setStringList('savedActors', savedActors);
-                              });
-
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  width: 300,
-                                  content: Text(isSaved ? '저장 해제됨' : '저장됨'),
-                                  duration: const Duration(seconds: 1),
-                                  behavior: SnackBarBehavior.floating,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(8),
+                              _showActorDetails(context, actor);
+                            },
+                            child: Stack(
+                              children: [
+                                ClipOval(
+                                  child: Image.network(
+                                    actor.profilePicture,
+                                    width: 100,
+                                    height: 100,
+                                    fit: BoxFit.cover,
                                   ),
                                 ),
-                              );
-                            },
-                            child: Icon(
-                              isSaved ? Icons.bookmark : Icons.bookmark_border,
-                              color: isSaved ? Colors.red : Colors.grey,
-                              size: 28,
+                                Positioned(
+                                  top: 0,
+                                  right: 0,
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      setState(() {
+                                        if (isSaved) {
+                                          savedActors.remove(actor.name);
+                                        } else {
+                                          savedActors.add(actor.name);
+                                        }
+                                        prefs.setStringList(
+                                            'savedActors', savedActors);
+                                      });
+
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        SnackBar(
+                                          width: 300,
+                                          content:
+                                              Text(isSaved ? '저장 해제됨' : '저장됨'),
+                                          duration: const Duration(seconds: 1),
+                                          behavior: SnackBarBehavior.floating,
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(8),
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                    child: Icon(
+                                      isSaved
+                                          ? Icons.bookmark
+                                          : Icons.bookmark_border,
+                                      color: isSaved ? Colors.red : Colors.grey,
+                                      size: 28,
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                        ),
-                      ],
-                    ),
+                          const SizedBox(height: 10),
+                          Text(
+                            actor.name,
+                            style: const TextStyle(
+                                fontSize: 20, fontWeight: FontWeight.bold),
+                          ),
+                        ],
+                      );
+                    },
+                    childCount: actorList.length,
                   ),
-                  const SizedBox(height: 10),
-                  Text(
-                    actor.name,
-                    style: const TextStyle(
-                        fontSize: 20, fontWeight: FontWeight.bold),
-                  ),
-                ],
-              );
-            },
+                ),
+              ),
+            ],
           ),
         );
       },
