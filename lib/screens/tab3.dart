@@ -68,19 +68,16 @@ class _Tab3State extends State<Tab3> {
 
   List<String> getFavoriteMusical() {
     final List<String>? previousSavedMusicals = prefs.getStringList('savedMusicals');
-    log("From getFavoriteMusical $previousSavedMusicals");
     return previousSavedMusicals ?? [];
   }
 
   void getFavoriteMusicalWait() {
-    log("getFavoriteMusicalWait started");
     savedMusicals = getFavoriteMusical();
   }
 
   // Musical JSON read, add musical schedule to Event list
   Future<void> makeEventFromFavoriteMusical() async {
     List<Musical>musicalsForEvent = await loadMusicalData();
-    log("From makeEventFromFavoriteMusical $musicalsForEvent");
     Map<DateTime, List<String>> newEvents = {};
 
     for(var musical in musicalsForEvent) {
@@ -100,7 +97,6 @@ class _Tab3State extends State<Tab3> {
         newEvents[endDate]!.add("[$title] 마감일");
       }
     }
-    log("Result from makeEventFromSavedActor: $newEvents");
     setState(() {
       musicalEvents = newEvents;
     });
@@ -112,13 +108,11 @@ class _Tab3State extends State<Tab3> {
   }
 
   void getFavoriteActorsMusicalWait() {
-    log("getFavoriteActorsMusicalWait Started");
     savedActors = getFavoriteActorsMusical();
   }
 
   // Musical JSON read, add musical schedule to Event list
   Future<void> makeEventFromSavedActor() async {
-    log("makeEventFromSavedActor Started");
     List<Musical>musicalsForEvent = await loadMusicalData();
     Map<DateTime, List<String>> newEvents = {};
 
@@ -145,7 +139,6 @@ class _Tab3State extends State<Tab3> {
         newEvents[endDate]!.add("[$title] 마감일");
       }
     }
-    log("Result from makeEventFromSavedActor: $newEvents");
 
     setState(() {
       actorEvents = newEvents;
@@ -161,7 +154,6 @@ class _Tab3State extends State<Tab3> {
   }
 
   Future<void> makeEventFromBothMusicalAndActor() async {
-    log("BOTH STARTED");
     Map<DateTime, List<String>> newEvents = {};
     for(var musical in musicals){
       bool actorAppearsInMusical = false;
@@ -185,7 +177,6 @@ class _Tab3State extends State<Tab3> {
       }
     }
 
-    log("Result from makeEventFromBothMusicalAndActor: $newEvents");
     setState(() {
       musicalAndActorEvents = newEvents;
     });
@@ -288,8 +279,8 @@ class _Tab3State extends State<Tab3> {
       body: SafeArea(
         child: Column(
           children: [
-            Container(
-              height: MediaQuery.of(context).size.height*0.5,
+            Expanded(
+              flex: 3,
               child: TableCalendar(
                 locale: 'ko_KR',
                 firstDay: DateTime.utc(2021, 10, 16),
@@ -298,24 +289,20 @@ class _Tab3State extends State<Tab3> {
                 selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
                 onDaySelected: _onDaySelected,
                 eventLoader: _getEventsForDay,
-                daysOfWeekHeight: MediaQuery.of(context).size.height*0.05,
                 headerStyle: const HeaderStyle(
                   titleCentered: true,
                   formatButtonVisible: false,
                 ),
-                calendarStyle: CalendarStyle(
-
-                ),
+                rowHeight: (MediaQuery.of(context).size.height * 0.14) - 50,
                 calendarBuilders: CalendarBuilders(
-                  markerBuilder: (context, day, events){
-                    if (events.isNotEmpty){
-                      return ListView.builder(
-                        shrinkWrap: true,
-                        itemCount: events.length,
-                        itemBuilder: (context, index) {
-                          return Container(
-                            margin: const EdgeInsets.only(top: 30),
-                            child: const Text(
+                  markerBuilder: (context, day, events) {
+                    if (events.isNotEmpty) {
+                      return Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: List.generate(events.length, (index) {
+                          return const Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 1.0),
+                            child: Text(
                               '🦊',
                               style: TextStyle(
                                 fontSize: 15,
@@ -323,9 +310,10 @@ class _Tab3State extends State<Tab3> {
                               ),
                             ),
                           );
-                        }
+                        }),
                       );
                     }
+                    return null;
                   },
                   defaultBuilder: (context, day, focusedDay) {
                     if (day.weekday == DateTime.saturday) {
@@ -348,11 +336,13 @@ class _Tab3State extends State<Tab3> {
                 ),
               ),
             ),
-            Container(
-              height: MediaQuery.of(context).size.height*0.05,
+            const SizedBox(height: 2),
+            Align(
+              alignment: Alignment.bottomLeft,
               child: CheckboxListTile(
                 title: const Text("원하는 뮤지컬만 골라 보기"),
                 value: buttonMusicalPressed,
+                activeColor: Colors.orangeAccent,
                 onChanged: (bool? value) {
                   buttonMusicalPressed = value ?? false;
                   if (buttonMusicalPressed){
@@ -392,11 +382,12 @@ class _Tab3State extends State<Tab3> {
                 selected: buttonMusicalPressed,
               ),
             ),
-            Container(
-              height: MediaQuery.of(context).size.height*0.05,
+            Align(
+              alignment: Alignment.bottomLeft,
               child: CheckboxListTile(
                 title: const Text("원하는 배우만 골라 보기"),
                 value: buttonActorPressed,
+                activeColor: Colors.orangeAccent,
                 onChanged: (bool? value) {
                   buttonActorPressed = value ?? false;
                   if (buttonActorPressed){
@@ -434,8 +425,9 @@ class _Tab3State extends State<Tab3> {
                 },
                 controlAffinity: ListTileControlAffinity.leading,  //  <-- leading Checkbox
                 selected: buttonActorPressed,
-              )
+              ),
             ),
+            const SizedBox(height: 10),
             Expanded(
               child: ValueListenableBuilder<List<String>>(
                 valueListenable: _selectedEvents,
