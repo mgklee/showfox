@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'screens/tab1.dart';
 import 'screens/tab2.dart';
 import 'screens/tab3.dart';
@@ -18,6 +19,8 @@ void main() async {
   final String actorJson = await rootBundle.loadString('assets/actor.json');
   final List<dynamic> actorData = json.decode(actorJson);
   final List<Actor> actors = actorData.map((item) => Actor.fromJson(item)).toList();
+
+  await initializeDateFormatting();
 
   runApp(MyApp(musicals: musicals, actors: actors));
 }
