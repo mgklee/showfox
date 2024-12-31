@@ -15,7 +15,7 @@ class Tab3 extends StatefulWidget {
 }
 
 class _Tab3State extends State<Tab3> {
-  late Future<List<Musical>> musicals;
+  List<Musical> musicals = [];
   List<String> savedMusicals = [];
   Map<DateTime, List<String>> musicalEvents = {};
   List<String> savedActors = [];
@@ -35,6 +35,10 @@ class _Tab3State extends State<Tab3> {
     final String response = await rootBundle.loadString('assets/musical.json');
     final List<dynamic> data = json.decode(response);
     return data.map((item) => Musical.fromJson(item as Map<String, dynamic>)).toList();
+  }
+
+  Future<void> getMusicalList() async {
+    musicals = await loadMusicalData();
   }
 
   Future<void> getAllEvents() async {
@@ -76,7 +80,7 @@ class _Tab3State extends State<Tab3> {
   // Musical JSON read, add musical schedule to Event list
   Future<void> makeEventFromFavoriteMusical() async {
     List<Musical>musicalsForEvent = await loadMusicalData();
-    log("From makeEventFromFavoriteMusical ${musicalsForEvent}");
+    log("From makeEventFromFavoriteMusical $musicalsForEvent");
     Map<DateTime, List<String>> newEvents = {};
 
     for(var musical in musicalsForEvent) {
@@ -96,7 +100,7 @@ class _Tab3State extends State<Tab3> {
         newEvents[endDate]!.add("[$title] 마감일");
       }
     }
-    log("Result from makeEventFromSavedActor: ${newEvents}");
+    log("Result from makeEventFromSavedActor: $newEvents");
     setState(() {
       musicalEvents = newEvents;
     });
@@ -141,7 +145,7 @@ class _Tab3State extends State<Tab3> {
         newEvents[endDate]!.add("[$title] 마감일");
       }
     }
-    log("Result from makeEventFromSavedActor: ${newEvents}");
+    log("Result from makeEventFromSavedActor: $newEvents");
 
     setState(() {
       actorEvents = newEvents;
@@ -159,17 +163,29 @@ class _Tab3State extends State<Tab3> {
   Future<void> makeEventFromBothMusicalAndActor() async {
     log("BOTH STARTED");
     Map<DateTime, List<String>> newEvents = {};
-    musicalEvents.forEach((date, musicalList){
-      if (actorEvents.containsKey(date)){
-        List<String> actorList = actorEvents[date] ?? [];
-        List<String> commonEvents = musicalList.where((event) => actorList.contains(event)).toList();
-        if (commonEvents.isNotEmpty) {
-          newEvents[date] = commonEvents;
-        }
+    for(var musical in musicals){
+      bool actorAppearsInMusical = false;
+      for (var actor in savedActors){
+        if (musical.actors.contains(actor)) {actorAppearsInMusical = true;}
       }
-    });
+      if (actorAppearsInMusical || savedMusicals.contains(musical.title)){
+        DateTime startDate = changeStringToDateTime(musical.firstDate);
+        DateTime endDate = changeStringToDateTime(musical.lastDate);
+        String title = musical.title;
 
-    log("Result from makeEventFromBothMusicalAndActor: ${newEvents}");
+        if (!newEvents.containsKey(startDate)) {
+          newEvents[startDate] = [];
+        }
+        newEvents[startDate]!.add("[$title] 시작일");
+
+        if (!newEvents.containsKey(endDate)) {
+          newEvents[endDate] = [];
+        }
+        newEvents[endDate]!.add("[$title] 마감일");
+      }
+    }
+
+    log("Result from makeEventFromBothMusicalAndActor: $newEvents");
     setState(() {
       musicalAndActorEvents = newEvents;
     });
@@ -180,7 +196,7 @@ class _Tab3State extends State<Tab3> {
     super.initState();
     _selectedDay = _focusedDay;
     _selectedEvents = ValueNotifier(_getEventsForDay(_selectedDay!));
-    musicals = loadMusicalData();
+    getMusicalList();
     getPref().then((_){
       getEventFromFavorite().then((_){
         makeEventFromBothMusicalAndActor();
@@ -269,140 +285,174 @@ class _Tab3State extends State<Tab3> {
         },
         child: const Icon(Icons.add),
       ),
-      body: Column(
-        children: [
-          CheckboxListTile(
-            title: const Text("원하는 뮤지컬만 골라 보기"),
-            value: buttonMusicalPressed,
-            onChanged: (bool? value) {
-              buttonMusicalPressed = value ?? false;
-              if (buttonMusicalPressed){
-                if(buttonActorPressed){
-                  setState(() {
-                    events = musicalAndActorEvents;
-                    _selectedEvents.value =
-                        _getEventsForDay(_selectedDay ?? _focusedDay);
-                  });
-                }
-                else{
-                  setState(() {
-                    events = musicalEvents;
-                    _selectedEvents.value =
-                        _getEventsForDay(_selectedDay ?? _focusedDay);
-                  });
-                }
-              }
-              else {
-                if(buttonActorPressed){
-                  setState(() {
-                    events = actorEvents;
-                    _selectedEvents.value =
-                        _getEventsForDay(_selectedDay ?? _focusedDay);
-                  });
-                }
-                else{
-                  setState(() {
-                    events = allEvents;
-                    _selectedEvents.value =
-                        _getEventsForDay(_selectedDay ?? _focusedDay);
-                  });
-                }
-              }
-            },
-            controlAffinity: ListTileControlAffinity.leading,  //  <-- leading Checkbox
-            selected: buttonMusicalPressed,
-          ),
-          CheckboxListTile(
-            title: const Text("원하는 배우만 골라 보기"),
-            value: buttonActorPressed,
-            onChanged: (bool? value) {
-              buttonActorPressed = value ?? false;
-              if (buttonActorPressed){
-                if(buttonMusicalPressed){
-                  setState(() {
-                    events = musicalAndActorEvents;
-                    _selectedEvents.value =
-                        _getEventsForDay(_selectedDay ?? _focusedDay);
-                  });
-                }
-                else{
-                  setState(() {
-                    events = actorEvents;
-                    _selectedEvents.value =
-                        _getEventsForDay(_selectedDay ?? _focusedDay);
-                  });
-                }
-              }
-              else {
-                if(buttonMusicalPressed){
-                  setState(() {
-                    events = musicalEvents;
-                    _selectedEvents.value =
-                        _getEventsForDay(_selectedDay ?? _focusedDay);
-                  });
-                }
-                else{
-                  setState(() {
-                    events = allEvents;
-                    _selectedEvents.value =
-                        _getEventsForDay(_selectedDay ?? _focusedDay);
-                  });
-                }
-              }
-            },
-            controlAffinity: ListTileControlAffinity.leading,  //  <-- leading Checkbox
-            selected: buttonActorPressed,
-          ),
-          TableCalendar(
-            locale: 'ko_KR',
-            firstDay: DateTime.utc(2021, 10, 16),
-            lastDay: DateTime.utc(2030, 3, 14),
-            focusedDay: _focusedDay,
-            selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
-            onDaySelected: _onDaySelected,
-            eventLoader: _getEventsForDay,
-            headerStyle: const HeaderStyle(
-              titleCentered: true,
-              formatButtonVisible: false,
-            ),
-            calendarBuilders: CalendarBuilders(
-              defaultBuilder: (context, day, focusedDay) {
-                if (day.weekday == DateTime.saturday) {
-                  return Center(
-                    child: Text(
-                      '${day.day}',
-                      style: TextStyle(color: Colors.blue),
-                    ),
-                  );
-                } else if (day.weekday == DateTime.sunday) {
-                  return Center(
-                    child: Text(
-                      '${day.day}',
-                      style: TextStyle(color: Colors.red),
-                    ),
-                  );
-                }
-                return null;
-              },
-            ),
-          ),
-          const SizedBox(height: 8.0),
-          Expanded(
-            child: ValueListenableBuilder<List<String>>(
-              valueListenable: _selectedEvents,
-              builder: (context, value, _) {
-                return ListView.builder(
-                  itemCount: value.length,
-                  itemBuilder: (context, index) {
-                    return ListTile(
-                      title: Text(value[index]),
-                    );
+      body: SafeArea(
+        child: Column(
+          children: [
+            Container(
+              height: MediaQuery.of(context).size.height*0.5,
+              child: TableCalendar(
+                locale: 'ko_KR',
+                firstDay: DateTime.utc(2021, 10, 16),
+                lastDay: DateTime.utc(2030, 3, 14),
+                focusedDay: _focusedDay,
+                selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
+                onDaySelected: _onDaySelected,
+                eventLoader: _getEventsForDay,
+                daysOfWeekHeight: MediaQuery.of(context).size.height*0.05,
+                headerStyle: const HeaderStyle(
+                  titleCentered: true,
+                  formatButtonVisible: false,
+                ),
+                calendarStyle: CalendarStyle(
+
+                ),
+                calendarBuilders: CalendarBuilders(
+                  markerBuilder: (context, day, events){
+                    if (events.isNotEmpty){
+                      return ListView.builder(
+                        shrinkWrap: true,
+                        itemCount: events.length,
+                        itemBuilder: (context, index) {
+                          return Container(
+                            margin: const EdgeInsets.only(top: 30),
+                            child: const Text(
+                              '🦊',
+                              style: TextStyle(
+                                fontSize: 15,
+                                color: Colors.orangeAccent,
+                              ),
+                            ),
+                          );
+                        }
+                      );
+                    }
                   },
-                );
-              },
+                  defaultBuilder: (context, day, focusedDay) {
+                    if (day.weekday == DateTime.saturday) {
+                      return Center(
+                        child: Text(
+                          '${day.day}',
+                          style: const TextStyle(color: Colors.blue),
+                        ),
+                      );
+                    } else if (day.weekday == DateTime.sunday) {
+                      return Center(
+                        child: Text(
+                          '${day.day}',
+                          style: const TextStyle(color: Colors.red),
+                        ),
+                      );
+                    }
+                    return null;
+                  },
+                ),
+              ),
             ),
-          ),
-        ],
+            Container(
+              height: MediaQuery.of(context).size.height*0.05,
+              child: CheckboxListTile(
+                title: const Text("원하는 뮤지컬만 골라 보기"),
+                value: buttonMusicalPressed,
+                onChanged: (bool? value) {
+                  buttonMusicalPressed = value ?? false;
+                  if (buttonMusicalPressed){
+                    if(buttonActorPressed){
+                      setState(() {
+                        events = musicalAndActorEvents;
+                        _selectedEvents.value =
+                            _getEventsForDay(_selectedDay ?? _focusedDay);
+                      });
+                    }
+                    else{
+                      setState(() {
+                        events = musicalEvents;
+                        _selectedEvents.value =
+                            _getEventsForDay(_selectedDay ?? _focusedDay);
+                      });
+                    }
+                  }
+                  else {
+                    if(buttonActorPressed){
+                      setState(() {
+                        events = actorEvents;
+                        _selectedEvents.value =
+                            _getEventsForDay(_selectedDay ?? _focusedDay);
+                      });
+                    }
+                    else{
+                      setState(() {
+                        events = allEvents;
+                        _selectedEvents.value =
+                            _getEventsForDay(_selectedDay ?? _focusedDay);
+                      });
+                    }
+                  }
+                },
+                controlAffinity: ListTileControlAffinity.leading,  //  <-- leading Checkbox
+                selected: buttonMusicalPressed,
+              ),
+            ),
+            Container(
+              height: MediaQuery.of(context).size.height*0.05,
+              child: CheckboxListTile(
+                title: const Text("원하는 배우만 골라 보기"),
+                value: buttonActorPressed,
+                onChanged: (bool? value) {
+                  buttonActorPressed = value ?? false;
+                  if (buttonActorPressed){
+                    if(buttonMusicalPressed){
+                      setState(() {
+                        events = musicalAndActorEvents;
+                        _selectedEvents.value =
+                            _getEventsForDay(_selectedDay ?? _focusedDay);
+                      });
+                    }
+                    else{
+                      setState(() {
+                        events = actorEvents;
+                        _selectedEvents.value =
+                            _getEventsForDay(_selectedDay ?? _focusedDay);
+                      });
+                    }
+                  }
+                  else {
+                    if(buttonMusicalPressed){
+                      setState(() {
+                        events = musicalEvents;
+                        _selectedEvents.value =
+                            _getEventsForDay(_selectedDay ?? _focusedDay);
+                      });
+                    }
+                    else{
+                      setState(() {
+                        events = allEvents;
+                        _selectedEvents.value =
+                            _getEventsForDay(_selectedDay ?? _focusedDay);
+                      });
+                    }
+                  }
+                },
+                controlAffinity: ListTileControlAffinity.leading,  //  <-- leading Checkbox
+                selected: buttonActorPressed,
+              )
+            ),
+            Expanded(
+              child: ValueListenableBuilder<List<String>>(
+                valueListenable: _selectedEvents,
+                builder: (context, value, _) {
+                  return ListView.builder(
+                    itemCount: value.length,
+                    itemBuilder: (context, index) {
+                      return ListTile(
+                        title: Text(value[index]),
+                      );
+                    },
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
