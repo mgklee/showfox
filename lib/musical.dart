@@ -7,6 +7,10 @@ class Musical {
   final int ageLimit;
   final int minPrice;
   final int maxPrice;
+  final String firstTicketOpen;
+  final String firstTerm;
+  final String secondTicketOpen;
+  final String secondTerm;
   final List actors;
   final String map;
   final String url;
@@ -21,6 +25,10 @@ class Musical {
     required this.ageLimit,
     required this.minPrice,
     required this.maxPrice,
+    required this.firstTicketOpen,
+    required this.firstTerm,
+    required this.secondTicketOpen,
+    required this.secondTerm,
     required this.actors,
     required this.map,
     required this.url,
@@ -37,6 +45,10 @@ class Musical {
       ageLimit: json['ageLimit'] as int,
       minPrice: json['minPrice'] as int,
       maxPrice: json['maxPrice'] as int,
+      firstTicketOpen: json['firstTicketOpen'] as String,
+      firstTerm: json['firstTerm'] as String,
+      secondTicketOpen: json['secondTicketOpen'] as String,
+      secondTerm: json['secondTerm'] as String,
       actors: json['actors'] as List,
       map: json['map'] as String,
       url: json['url'] as String,
