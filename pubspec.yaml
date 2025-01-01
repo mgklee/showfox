@@ -83,6 +83,9 @@ flutter:
     - assets/images/sonjunho/
     - assets/images/yoondohyun/
     - assets/images/yujunsang/
+    - assets/images/slivers/
+    - assets/splash_sound.mp3
+
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
@@ -112,4 +115,4 @@ flutter:
 
 flutter_native_splash:
   color: "#ffffff"
-  image: assets/images/splash/splash3.jpg
+  image: assets/images/splash/splash8.png
