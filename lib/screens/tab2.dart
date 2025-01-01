@@ -11,7 +11,7 @@ class Tab2 extends StatefulWidget {
   final List<Musical> musicals;
   final List<Actor> actors;
 
-  const Tab2({super.key, required this.musicals, required this.actors,});
+  const Tab2({super.key, required this.musicals, required this.actors});
 
   @override
   _Tab2State createState() => _Tab2State();
@@ -182,7 +182,7 @@ class _Tab2State extends State<Tab2> {
                 style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
               content: SizedBox(
-                width: MediaQuery.of(context).size.width * 0.9, // 90% of screen width
+                width: MediaQuery.of(context).size.width * 0.9,
                 child: SingleChildScrollView(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
@@ -202,7 +202,7 @@ class _Tab2State extends State<Tab2> {
                               );
                             }).toList(),
                             options: CarouselOptions(
-                              height: MediaQuery.of(context).size.height * 0.5,
+                              height: MediaQuery.of(context).size.height * 0.4,
                               onPageChanged: (index, reason) {
                                 setState(() {
                                   currentIndex = index;
@@ -253,7 +253,6 @@ class _Tab2State extends State<Tab2> {
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
-    final screenHeight = MediaQuery.of(context).size.height;
     const double itemWidth = 120;
     final crossAxisCount = ((screenWidth - 40) / itemWidth).floor();
 
@@ -273,7 +272,8 @@ class _Tab2State extends State<Tab2> {
               delegate: SliverChildBuilderDelegate(
                 (BuildContext context, int index) {
                   final actor = widget.actors[index];
-                  final isSaved = savedActors.contains(actor.name); // Check if it's saved
+                  final isSaved =
+                      savedActors.contains(actor.name); // Check if it's saved
                   return Column(
                     children: [
                       const SizedBox(height: 20),
@@ -334,9 +334,7 @@ class _Tab2State extends State<Tab2> {
                       Text(
                         actor.name,
                         style: const TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold
-                        ),
+                            fontSize: 20, fontWeight: FontWeight.bold),
                       ),
                     ],
                   );
