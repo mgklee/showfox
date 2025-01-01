@@ -279,6 +279,15 @@ class _Tab2State extends State<Tab2> {
       body: CustomScrollView(
         physics: const BouncingScrollPhysics(), // Enables smooth scrolling
         slivers: [
+          const SliverAppBar(
+            // toolbarHeight: 50.0,
+            expandedHeight: 250.0,
+            flexibleSpace: FlexibleSpaceBar(
+                background: Image(
+              image: AssetImage('assets/images/slivers/sliver2.jpeg'),
+              fit: BoxFit.cover,
+            )),
+          ),
           SliverPadding(
             padding: const EdgeInsets.all(20),
             sliver: SliverGrid(
