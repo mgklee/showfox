@@ -283,10 +283,25 @@ class _Tab3State extends State<Tab3> {
   void _addEvent(String title) {
     if (_selectedDay != null && title.isNotEmpty) {
       setState(() {
-        if (!events.containsKey(_selectedDay)) {
-          events[_selectedDay!] = [];
+        if (!allEvents.containsKey(_selectedDay)) {
+          allEvents[_selectedDay!] = [];
         }
-        events[_selectedDay!]!.add(title);
+        allEvents[_selectedDay!]!.add(title);
+
+        if (!actorEvents.containsKey(_selectedDay)) {
+          actorEvents[_selectedDay!] = [];
+        }
+        actorEvents[_selectedDay!]!.add(title);
+
+        if (!musicalEvents.containsKey(_selectedDay)) {
+          musicalEvents[_selectedDay!] = [];
+        }
+        musicalEvents[_selectedDay!]!.add(title);
+
+        if (!musicalAndActorEvents.containsKey(_selectedDay)) {
+          musicalAndActorEvents[_selectedDay!] = [];
+        }
+        musicalAndActorEvents[_selectedDay!]!.add(title);
       });
       _selectedEvents.value = _getEventsForDay(_selectedDay!);
       addedDate.add(_selectedDay!.toIso8601String());
@@ -294,6 +309,59 @@ class _Tab3State extends State<Tab3> {
       addedTitle.add(title);
       prefs.setStringList('userAddedTitle', addedTitle);
     }
+  }
+
+  void removeEvent(var value, var index) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('${value[index]}이(가) 삭제되었습니다.')),
+    );
+    addedDate.removeAt(addedDate.indexOf(_selectedDay!.toIso8601String()));
+    addedTitle.removeAt(addedTitle.indexOf(value[index]));
+
+    prefs.setStringList('userAddedDate', addedDate);
+    prefs.setStringList('userAddedTitle', addedTitle);
+
+    final allEventList = allEvents[_selectedDay!];
+    if (allEventList != null) {
+      allEventList.remove(value[index]);
+      if (allEventList.isEmpty) {
+        allEvents.remove(_selectedDay!);
+      } else {
+        allEvents[_selectedDay!] = allEventList;
+      }
+    }
+
+    final actorEventList = actorEvents[_selectedDay!];
+    if (actorEventList != null) {
+      actorEventList.remove(value[index]);
+      if (actorEventList.isEmpty) {
+        actorEvents.remove(_selectedDay!);
+      } else {
+        actorEvents[_selectedDay!] = actorEventList;
+      }
+    }
+
+    final musicalEventList = musicalEvents[_selectedDay!];
+    if (musicalEventList != null) {
+      musicalEventList.remove(value[index]);
+      if (musicalEventList.isEmpty) {
+        musicalEvents.remove(_selectedDay!);
+      } else {
+        musicalEvents[_selectedDay!] = musicalEventList;
+      }
+    }
+
+    final musicalAndActorEventList = musicalAndActorEvents[_selectedDay!];
+    if (musicalAndActorEventList != null) {
+      musicalAndActorEventList.remove(value[index]);
+      if (musicalAndActorEventList.isEmpty) {
+        musicalAndActorEvents.remove(_selectedDay!);
+      } else {
+        musicalAndActorEvents[_selectedDay!] = musicalAndActorEventList;
+      }
+    }
+
+    _selectedEvents.value = _getEventsForDay(_selectedDay!);
   }
 
   void getButtonState(){
@@ -372,7 +440,7 @@ class _Tab3State extends State<Tab3> {
           child: Column(
             children: [
               SizedBox(
-                height: MediaQuery.of(context).size.height * 0.5,
+                height: MediaQuery.of(context).size.height * 0.45,
                 child: Flexible(
                   flex: 5,
                   child: TableCalendar(
@@ -393,7 +461,7 @@ class _Tab3State extends State<Tab3> {
                         if (events.isNotEmpty) {
                           return Row(
                             mainAxisAlignment: MainAxisAlignment.center,
-                            children: List.generate(events.length, (index) {
+                            children: List.generate(min(events.length, 2), (index) {
                               return const Padding(
                                 padding: EdgeInsets.symmetric(horizontal: 1.0),
                                 child: Text(
@@ -478,33 +546,15 @@ class _Tab3State extends State<Tab3> {
                             key: UniqueKey(),
                             background: Container(color: Colors.red,),
                             direction: DismissDirection.startToEnd,
-                            onDismissed: (direction){//값을 완전히 삭제
+                            onDismissed: (direction){
                               setState(() {
                                 final dateIndex = addedDate.indexOf(_selectedDay!.toIso8601String());
                                 final titleIndex = addedTitle.indexOf(value[index]);
                                 if (dateIndex != -1 && titleIndex != -1 && addedDate.contains(_selectedDay!.toIso8601String()) && addedTitle.contains(value[index])) {
-                                  addedDate.removeAt(dateIndex);
-                                  addedTitle.removeAt(titleIndex);
-
-                                  prefs.setStringList('userAddedDate', addedDate);
-                                  prefs.setStringList('userAddedTitle', addedTitle);
-
-                                  final eventList = events[_selectedDay!];
-                                  if (eventList != null) {
-                                    eventList.remove(value[index]);
-                                    if (eventList.isEmpty) {
-                                      events.remove(_selectedDay!);
-                                    } else {
-                                      events[_selectedDay!] = eventList;
-                                    }
-                                  }
-                                  _selectedEvents.value = _getEventsForDay(_selectedDay!);
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(content: Text('${value[index]}이(가) 삭제되었습니다.')),
-                                  );
+                                  removeEvent(value, index);
                                 } else{
                                   ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(content: Text('존재하는 뮤지컬 일정은 삭제할 수 없습니다.')),
+                                    const SnackBar(content: Text('존재하는 뮤지컬 일정은 삭제할 수 없습니다.')),
                                   );
                                 }
                               });
