@@ -1,21 +1,20 @@
-import 'dart:convert';
 import 'dart:math';
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:table_calendar/table_calendar.dart';
 import '../musical.dart';
 
 class Tab3 extends StatefulWidget {
-  const Tab3({Key? key}) : super(key: key);
+  final List<Musical> musicals;
+
+  const Tab3({super.key, required this.musicals});
 
   @override
   _Tab3State createState() => _Tab3State();
 }
 
 class _Tab3State extends State<Tab3> {
-  List<Musical> musicals = [];
   List<String> savedMusicals = [];
   List<String> savedActors = [];
   List<String> addedDate = [];
@@ -33,20 +32,10 @@ class _Tab3State extends State<Tab3> {
   bool buttonMusicalPressed = false;
   bool buttonActorPressed = false;
 
-  Future<List<Musical>> loadMusicalData() async {
-    final String response = await rootBundle.loadString('assets/musical.json');
-    final List<dynamic> data = json.decode(response);
-    return data.map((item) => Musical.fromJson(item as Map<String, dynamic>)).toList();
-  }
-
-  Future<void> getMusicalList() async {
-    musicals = await loadMusicalData();
-  }
-
-  Future<void> getAllEvents() async {
-    List<Musical>musicalsForEvent = await loadMusicalData();
+  void getAllEvents() {
     Map<DateTime, List<String>> newEvents = {};
-    for(var musical in musicalsForEvent) {
+
+    for (Musical musical in widget.musicals) {
       DateTime firstBookDate = changeStringToDateTime(musical.firstTicketOpen.split(' ')[0]);
       DateTime secondBookDate = changeStringToDateTime(musical.secondTicketOpen.split(' ')[0]);
       String firstBookHour = musical.firstTicketOpen.split(' ')[1];
@@ -65,15 +54,15 @@ class _Tab3State extends State<Tab3> {
       }
       newEvents[secondBookDate]!.add("[$title] $secondBookHour 2차 티켓 오픈\n($secondTerm)");
     }
-    for (int i = 0;i<min(addedTitle.length, addedDate.length);i++){
+
+    for (int i = 0; i < min(addedTitle.length, addedDate.length); i++) {
       if (!newEvents.containsKey(DateTime.parse(addedDate[i]))){
         newEvents[DateTime.parse(addedDate[i])] = [];
       }
       newEvents[DateTime.parse(addedDate[i])]!.add(addedTitle[i]);
     }
-    setState(() {
-      allEvents = newEvents;
-    });
+
+    setState(() => allEvents = newEvents);
   }
 
   Future<void> getPref() async {
@@ -90,36 +79,39 @@ class _Tab3State extends State<Tab3> {
   }
 
   // Musical JSON read, add musical schedule to Event list
-  Future<void> makeEventFromFavoriteMusical() async {
-    List<Musical>musicalsForEvent = await loadMusicalData();
+  void makeEventFromFavoriteMusical() {
     Map<DateTime, List<String>> newEvents = {};
 
-    for(var musical in musicalsForEvent) {
+    for (Musical musical in widget.musicals) {
       if (savedMusicals.contains(musical.title)) {
-        DateTime startDate = changeStringToDateTime(musical.firstDate);
-        DateTime endDate = changeStringToDateTime(musical.lastDate);
+        DateTime firstBookDate = changeStringToDateTime(musical.firstTicketOpen.split(' ')[0]);
+        DateTime secondBookDate = changeStringToDateTime(musical.secondTicketOpen.split(' ')[0]);
+        String firstBookHour = musical.firstTicketOpen.split(' ')[1];
+        String secondBookHour = musical.secondTicketOpen.split(' ')[1];
+        String firstTerm = musical.firstTerm;
+        String secondTerm = musical.secondTerm;
         String title = musical.title;
 
-        if (!newEvents.containsKey(startDate)) {
-          newEvents[startDate] = [];
+        if (!newEvents.containsKey(firstBookDate)) {
+          newEvents[firstBookDate] = [];
         }
-        newEvents[startDate]!.add("[$title] 시작일");
+        newEvents[firstBookDate]!.add("[$title] $firstBookHour 1차 티켓 오픈\n($firstTerm)");
 
-        if (!newEvents.containsKey(endDate)) {
-          newEvents[endDate] = [];
+        if (!newEvents.containsKey(secondBookDate)) {
+          newEvents[secondBookDate] = [];
         }
-        newEvents[endDate]!.add("[$title] 마감일");
+        newEvents[secondBookDate]!.add("[$title] $secondBookHour 2차 티켓 오픈\n($secondTerm)");
       }
     }
-    for (int i = 0;i<min(addedTitle.length, addedDate.length);i++){
+
+    for (int i = 0; i < min(addedTitle.length, addedDate.length); i++) {
       if (!newEvents.containsKey(DateTime.parse(addedDate[i]))){
         newEvents[DateTime.parse(addedDate[i])] = [];
       }
       newEvents[DateTime.parse(addedDate[i])]!.add(addedTitle[i]);
     }
-    setState(() {
-      musicalEvents = newEvents;
-    });
+
+    setState(() => musicalEvents = newEvents);
   }
 
   List<String> getFavoriteActorsMusical() {
@@ -132,42 +124,46 @@ class _Tab3State extends State<Tab3> {
   }
 
   // Musical JSON read, add musical schedule to Event list
-  Future<void> makeEventFromSavedActor() async {
-    List<Musical>musicalsForEvent = await loadMusicalData();
+  void makeEventFromSavedActor() {
     Map<DateTime, List<String>> newEvents = {};
 
-    for(var musical in musicalsForEvent) {
+    for(Musical musical in widget.musicals) {
       bool actorAppearsInMusical = false;
-      for(var actor in savedActors) {
+      for (var actor in savedActors) {
         if (musical.actors.contains(actor)) {
           actorAppearsInMusical = true;
         }
       }
-      if (actorAppearsInMusical){
-        DateTime startDate = changeStringToDateTime(musical.firstDate);
-        DateTime endDate = changeStringToDateTime(musical.lastDate);
+
+      if (actorAppearsInMusical) {
+        DateTime firstBookDate = changeStringToDateTime(musical.firstTicketOpen.split(' ')[0]);
+        DateTime secondBookDate = changeStringToDateTime(musical.secondTicketOpen.split(' ')[0]);
+        String firstBookHour = musical.firstTicketOpen.split(' ')[1];
+        String secondBookHour = musical.secondTicketOpen.split(' ')[1];
+        String firstTerm = musical.firstTerm;
+        String secondTerm = musical.secondTerm;
         String title = musical.title;
 
-        if (!newEvents.containsKey(startDate)) {
-          newEvents[startDate] = [];
+        if (!newEvents.containsKey(firstBookDate)) {
+          newEvents[firstBookDate] = [];
         }
-        newEvents[startDate]!.add("[$title] 시작일");
+        newEvents[firstBookDate]!.add("[$title] $firstBookHour 1차 티켓 오픈\n($firstTerm)");
 
-        if (!newEvents.containsKey(endDate)) {
-          newEvents[endDate] = [];
+        if (!newEvents.containsKey(secondBookDate)) {
+          newEvents[secondBookDate] = [];
         }
-        newEvents[endDate]!.add("[$title] 마감일");
+        newEvents[secondBookDate]!.add("[$title] $secondBookHour 2차 티켓 오픈\n($secondTerm)");
       }
     }
-    for (int i = 0;i<min(addedTitle.length, addedDate.length);i++){
+
+    for (int i = 0; i < min(addedTitle.length, addedDate.length); i++) {
       if (!newEvents.containsKey(DateTime.parse(addedDate[i]))){
         newEvents[DateTime.parse(addedDate[i])] = [];
       }
       newEvents[DateTime.parse(addedDate[i])]!.add(addedTitle[i]);
     }
-    setState(() {
-      actorEvents = newEvents;
-    });
+
+    setState(() => actorEvents = newEvents);
   }
 
   Future<void> getEventFromFavorite() async {
@@ -178,38 +174,43 @@ class _Tab3State extends State<Tab3> {
     makeEventFromSavedActor();
   }
 
-  Future<void> makeEventFromBothMusicalAndActor() async {
+  void makeEventFromBothMusicalAndActor() {
     Map<DateTime, List<String>> newEvents = {};
-    for(var musical in musicals){
+    for(Musical musical in widget.musicals) {
       bool actorAppearsInMusical = false;
-      for (var actor in savedActors){
+      for (var actor in savedActors) {
         if (musical.actors.contains(actor)) {actorAppearsInMusical = true;}
       }
-      if (actorAppearsInMusical || savedMusicals.contains(musical.title)){
-        DateTime startDate = changeStringToDateTime(musical.firstDate);
-        DateTime endDate = changeStringToDateTime(musical.lastDate);
+
+      if (actorAppearsInMusical || savedMusicals.contains(musical.title)) {
+        DateTime firstBookDate = changeStringToDateTime(musical.firstTicketOpen.split(' ')[0]);
+        DateTime secondBookDate = changeStringToDateTime(musical.secondTicketOpen.split(' ')[0]);
+        String firstBookHour = musical.firstTicketOpen.split(' ')[1];
+        String secondBookHour = musical.secondTicketOpen.split(' ')[1];
+        String firstTerm = musical.firstTerm;
+        String secondTerm = musical.secondTerm;
         String title = musical.title;
 
-        if (!newEvents.containsKey(startDate)) {
-          newEvents[startDate] = [];
+        if (!newEvents.containsKey(firstBookDate)) {
+          newEvents[firstBookDate] = [];
         }
-        newEvents[startDate]!.add("[$title] 시작일");
+        newEvents[firstBookDate]!.add("[$title] $firstBookHour 1차 티켓 오픈\n($firstTerm)");
 
-        if (!newEvents.containsKey(endDate)) {
-          newEvents[endDate] = [];
+        if (!newEvents.containsKey(secondBookDate)) {
+          newEvents[secondBookDate] = [];
         }
-        newEvents[endDate]!.add("[$title] 마감일");
+        newEvents[secondBookDate]!.add("[$title] $secondBookHour 2차 티켓 오픈\n($secondTerm)");
       }
     }
-    for (int i = 0;i<min(addedTitle.length, addedDate.length);i++){
-      if (!newEvents.containsKey(DateTime.parse(addedDate[i]))){
+
+    for (int i = 0; i < min(addedTitle.length, addedDate.length); i++) {
+      if (!newEvents.containsKey(DateTime.parse(addedDate[i]))) {
         newEvents[DateTime.parse(addedDate[i])] = [];
       }
       newEvents[DateTime.parse(addedDate[i])]!.add(addedTitle[i]);
     }
-    setState(() {
-      musicalAndActorEvents = newEvents;
-    });
+
+    setState(() => musicalAndActorEvents = newEvents);
   }
 
   List<String> getUserAddedTitle() {
@@ -240,7 +241,6 @@ class _Tab3State extends State<Tab3> {
     super.initState();
     _selectedDay = _focusedDay;
     _selectedEvents = ValueNotifier(_getEventsForDay(_selectedDay!));
-    getMusicalList();
     getPref().then((_){
       getUserAddedEvent().then((_){
         getEventFromFavorite().then((_){
@@ -393,61 +393,61 @@ class _Tab3State extends State<Tab3> {
                 height: MediaQuery.of(context).size.height * 0.51,
                 // child: Flexible(
                 //   flex: 5,
-                  child: TableCalendar(
-                    locale: 'ko_KR',
-                    shouldFillViewport: true,
-                    firstDay: DateTime.utc(2021, 10, 16),
-                    lastDay: DateTime.utc(2030, 3, 14),
-                    focusedDay: _focusedDay,
-                    selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
-                    onDaySelected: _onDaySelected,
-                    eventLoader: _getEventsForDay,
-                    headerStyle: const HeaderStyle(
-                      titleCentered: true,
-                      formatButtonVisible: false,
-                    ),
-                    rowHeight: (MediaQuery.of(context).size.height * 0.13) - 50,
-                    calendarBuilders: CalendarBuilders(
-                      markerBuilder: (context, day, events) {
-                        if (events.isNotEmpty) {
-                          return Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: List.generate(min(events.length, 2), (index) {
-                              return const Padding(
-                                padding: EdgeInsets.symmetric(horizontal: 1.0),
-                                child: Text(
-                                  '🦊',
-                                  style: TextStyle(
-                                    fontSize: 15,
-                                    color: Colors.orangeAccent,
-                                  ),
-                                ),
-                              );
-                            }),
-                          );
-                        }
-                        return null;
-                      },
-                      defaultBuilder: (context, day, focusedDay) {
-                        if (day.weekday == DateTime.saturday) {
-                          return Center(
-                            child: Text(
-                              '${day.day}',
-                              style: const TextStyle(color: Colors.blue),
-                            ),
-                          );
-                        } else if (day.weekday == DateTime.sunday) {
-                          return Center(
-                            child: Text(
-                              '${day.day}',
-                              style: const TextStyle(color: Colors.red),
-                            ),
-                          );
-                        }
-                        return null;
-                      },
-                    ),
+                child: TableCalendar(
+                  locale: 'ko_KR',
+                  shouldFillViewport: true,
+                  firstDay: DateTime.utc(2021, 10, 16),
+                  lastDay: DateTime.utc(2030, 3, 14),
+                  focusedDay: _focusedDay,
+                  selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
+                  onDaySelected: _onDaySelected,
+                  eventLoader: _getEventsForDay,
+                  headerStyle: const HeaderStyle(
+                    titleCentered: true,
+                    formatButtonVisible: false,
                   ),
+                  rowHeight: (MediaQuery.of(context).size.height * 0.13) - 50,
+                  calendarBuilders: CalendarBuilders(
+                    markerBuilder: (context, day, events) {
+                      if (events.isNotEmpty) {
+                        return Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: List.generate(min(events.length, 2), (index) {
+                            return const Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 1.0),
+                              child: Text(
+                                '🦊',
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  color: Colors.orangeAccent,
+                                ),
+                              ),
+                            );
+                          }),
+                        );
+                      }
+                      return null;
+                    },
+                    defaultBuilder: (context, day, focusedDay) {
+                      if (day.weekday == DateTime.saturday) {
+                        return Center(
+                          child: Text(
+                            '${day.day}',
+                            style: const TextStyle(color: Colors.blue),
+                          ),
+                        );
+                      } else if (day.weekday == DateTime.sunday) {
+                        return Center(
+                          child: Text(
+                            '${day.day}',
+                            style: const TextStyle(color: Colors.red),
+                          ),
+                        );
+                      }
+                      return null;
+                    },
+                  ),
+                ),
                 // ),
               ),
               SizedBox(
@@ -534,7 +534,7 @@ class _Tab3State extends State<Tab3> {
                         itemBuilder: (context, index) {
                           return Dismissible(
                             key: UniqueKey(),
-                            background: Container(color: Colors.red,),
+                            background: Container(color: Colors.red),
                             direction: DismissDirection.startToEnd,
                             onDismissed: (direction){
                               var valueToRemove = value[index];

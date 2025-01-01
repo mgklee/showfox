@@ -65,7 +65,7 @@ class _HomePageState extends State<HomePage> {
         musicals: widget.musicals,
         actors: widget.actors,
       ),
-      Tab3(),
+      Tab3(musicals: widget.musicals),
     ];
 
     return Scaffold(

@@ -45,9 +45,7 @@ class _Tab2State extends State<Tab2> {
             style: const TextStyle(fontWeight: FontWeight.bold),
           ),
         ),
-        Flexible(
-          child: value,
-        ),
+        Flexible(child: value),
       ],
     );
   }
@@ -136,8 +134,8 @@ class _Tab2State extends State<Tab2> {
 
     // Filter out images in the dynamically chosen directory
     final imagePaths = assets
-        .where((String imagePath) => imagePath.startsWith(directory))
-        .toList();
+      .where((String imagePath) => imagePath.startsWith(directory))
+      .toList();
 
     List<Widget> musicals = [];
 
@@ -317,7 +315,7 @@ class _Tab2State extends State<Tab2> {
                                       ScaffoldMessenger.of(context).hideCurrentSnackBar();
                                       ScaffoldMessenger.of(context).showSnackBar(
                                         SnackBar(
-                                          width: 300,
+                                          width: 200,
                                           content: Text(isSaved ? '저장 해제됨' : '저장됨'),
                                           duration: const Duration(seconds: 1), // Short duration for quick response
                                           behavior: SnackBarBehavior.floating, // Makes it appear above other content
