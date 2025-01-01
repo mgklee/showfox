@@ -39,7 +39,7 @@ class _Tab1State extends State<Tab1> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SizedBox(
-          width: 80,
+          width: 60,
           child: Text(
             label,
             style: const TextStyle(fontWeight: FontWeight.bold),
@@ -71,7 +71,10 @@ class _Tab1State extends State<Tab1> {
                 Navigator.of(context).pop();
                 _showActorDetails(context, actor);
               },
-              child: Text(musical.actors[i]),
+              child: Text(
+                musical.actors[i],
+                style: const TextStyle(color: Colors.deepPurple),
+              ),
             ),
           );
         }
@@ -88,10 +91,7 @@ class _Tab1State extends State<Tab1> {
         return AlertDialog(
           title: Text(
             "${musical.title} 상세정보",
-            style: const TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold
-            ),
+            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
@@ -106,12 +106,6 @@ class _Tab1State extends State<Tab1> {
             ],
           ),
           actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(); // Close the dialog
-              },
-              child: const Text('닫기'),
-            ),
             TextButton(
               onPressed: () {
                 _launchURL(musical.map);
@@ -142,14 +136,14 @@ class _Tab1State extends State<Tab1> {
 
     // Filter out images in the dynamically chosen directory
     final imagePaths = assets
-        .where((String imagePath) => imagePath.startsWith(directory))
-        .toList();
+      .where((String imagePath) => imagePath.startsWith(directory))
+      .toList();
 
     List<Widget> musicals = [];
 
     for (int i = 0; i < actor.musicals.length; i++) {
       Iterable<Musical> match = widget.musicals.where(
-              (element) => element.title == actor.musicals[i]
+        (element) => element.title == actor.musicals[i]
       );
 
       if (match.isEmpty) {
@@ -162,7 +156,10 @@ class _Tab1State extends State<Tab1> {
                 Navigator.of(context).pop();
                 _showMusicalDetails(context, musical);
               },
-              child: Text(actor.musicals[i]),
+              child: Text(
+                actor.musicals[i],
+                style: const TextStyle(color: Colors.deepPurple),
+              ),
             ),
           );
         }
@@ -185,7 +182,7 @@ class _Tab1State extends State<Tab1> {
                 style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
               content: SizedBox(
-                width: MediaQuery.of(context).size.width * 0.8, // 80% of screen width
+                width: MediaQuery.of(context).size.width * 0.9,
                 child: SingleChildScrollView(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
@@ -205,7 +202,7 @@ class _Tab1State extends State<Tab1> {
                               );
                             }).toList(),
                             options: CarouselOptions(
-                              height: MediaQuery.of(context).size.height * 0.5,
+                              height: MediaQuery.of(context).size.height * 0.4,
                               onPageChanged: (index, reason) {
                                 setState(() {
                                   currentIndex = index;
@@ -224,12 +221,11 @@ class _Tab1State extends State<Tab1> {
                                 return Container(
                                   width: 8,
                                   height: 8,
-                                  margin: const EdgeInsets.symmetric(
-                                      vertical: 2, horizontal: 2),
+                                  margin: const EdgeInsets.all(2),
                                   decoration: BoxDecoration(
                                     shape: BoxShape.circle,
-                                    color: Colors.white.withOpacity(
-                                      currentIndex == entry.key ? 1 : 0.5,
+                                    color: Colors.white.withValues(
+                                      alpha: currentIndex == entry.key ? 1 : 0.5,
                                     ),
                                   ),
                                 );
@@ -247,14 +243,6 @@ class _Tab1State extends State<Tab1> {
                   ),
                 ),
               ),
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    Navigator.of(context).pop(); // Close the dialog
-                  },
-                  child: const Text('닫기'),
-                ),
-              ],
             );
           },
         );
