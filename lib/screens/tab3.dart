@@ -368,147 +368,159 @@ class _Tab3State extends State<Tab3> {
           },
           child: const Icon(Icons.add),
         ),
-        body: Column(
+        body: SingleChildScrollView(
+          child: Column(
             children: [
-              Expanded(
-                flex: 3,
-                child: TableCalendar(
-                  locale: 'ko_KR',
-                  firstDay: DateTime.utc(2021, 10, 16),
-                  lastDay: DateTime.utc(2030, 3, 14),
-                  focusedDay: _focusedDay,
-                  selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
-                  onDaySelected: _onDaySelected,
-                  eventLoader: _getEventsForDay,
-                  headerStyle: const HeaderStyle(
-                    titleCentered: true,
-                    formatButtonVisible: false,
-                  ),
-                  rowHeight: (MediaQuery.of(context).size.height * 0.13) - 50,
-                  calendarBuilders: CalendarBuilders(
-                    markerBuilder: (context, day, events) {
-                      if (events.isNotEmpty) {
-                        return Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: List.generate(events.length, (index) {
-                            return const Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 1.0),
-                              child: Text(
-                                '🦊',
-                                style: TextStyle(
-                                  fontSize: 15,
-                                  color: Colors.orangeAccent,
+              SizedBox(
+                height: MediaQuery.of(context).size.height * 0.5,
+                child: Flexible(
+                  flex: 5,
+                  child: TableCalendar(
+                    locale: 'ko_KR',
+                    firstDay: DateTime.utc(2021, 10, 16),
+                    lastDay: DateTime.utc(2030, 3, 14),
+                    focusedDay: _focusedDay,
+                    selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
+                    onDaySelected: _onDaySelected,
+                    eventLoader: _getEventsForDay,
+                    headerStyle: const HeaderStyle(
+                      titleCentered: true,
+                      formatButtonVisible: false,
+                    ),
+                    rowHeight: (MediaQuery.of(context).size.height * 0.13) - 50,
+                    calendarBuilders: CalendarBuilders(
+                      markerBuilder: (context, day, events) {
+                        if (events.isNotEmpty) {
+                          return Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: List.generate(events.length, (index) {
+                              return const Padding(
+                                padding: EdgeInsets.symmetric(horizontal: 1.0),
+                                child: Text(
+                                  '🦊',
+                                  style: TextStyle(
+                                    fontSize: 15,
+                                    color: Colors.orangeAccent,
+                                  ),
                                 ),
-                              ),
-                            );
-                          }),
-                        );
-                      }
-                      return null;
-                    },
-                    defaultBuilder: (context, day, focusedDay) {
-                      if (day.weekday == DateTime.saturday) {
-                        return Center(
-                          child: Text(
-                            '${day.day}',
-                            style: const TextStyle(color: Colors.blue),
-                          ),
-                        );
-                      } else if (day.weekday == DateTime.sunday) {
-                        return Center(
-                          child: Text(
-                            '${day.day}',
-                            style: const TextStyle(color: Colors.red),
-                          ),
-                        );
-                      }
-                      return null;
-                    },
+                              );
+                            }),
+                          );
+                        }
+                        return null;
+                      },
+                      defaultBuilder: (context, day, focusedDay) {
+                        if (day.weekday == DateTime.saturday) {
+                          return Center(
+                            child: Text(
+                              '${day.day}',
+                              style: const TextStyle(color: Colors.blue),
+                            ),
+                          );
+                        } else if (day.weekday == DateTime.sunday) {
+                          return Center(
+                            child: Text(
+                              '${day.day}',
+                              style: const TextStyle(color: Colors.red),
+                            ),
+                          );
+                        }
+                        return null;
+                      },
+                    ),
                   ),
                 ),
               ),
-              const SizedBox(height: 2),
-              Align(
-                alignment: Alignment.bottomLeft,
-                child: CheckboxListTile(
-                  title: const Text("원하는 뮤지컬만 골라 보기"),
-                  value: buttonMusicalPressed,
-                  activeColor: Colors.orangeAccent,
-                  onChanged: (bool? value) {
-                    buttonMusicalPressed = value ?? false;
-                    getButtonState();
-                  },
-                  controlAffinity: ListTileControlAffinity.leading,  //  <-- leading Checkbox
-                  selected: buttonMusicalPressed,
+              SizedBox(
+                height: 50,
+                child: Align(
+                  alignment: Alignment.bottomLeft,
+                  child: CheckboxListTile(
+                    title: const Text("원하는 뮤지컬만 골라 보기"),
+                    value: buttonMusicalPressed,
+                    activeColor: Colors.orangeAccent,
+                    onChanged: (bool? value) {
+                      buttonMusicalPressed = value ?? false;
+                      getButtonState();
+                    },
+                    controlAffinity: ListTileControlAffinity.leading,  //  <-- leading Checkbox
+                    selected: buttonMusicalPressed,
+                  ),
                 ),
               ),
-              Align(
-                alignment: Alignment.bottomLeft,
-                child: CheckboxListTile(
-                  title: const Text("원하는 배우만 골라 보기"),
-                  value: buttonActorPressed,
-                  activeColor: Colors.orangeAccent,
-                  onChanged: (bool? value) {
-                    buttonActorPressed = value ?? false;
-                    getButtonState();
-                  },
-                  controlAffinity: ListTileControlAffinity.leading,  //  <-- leading Checkbox
-                  selected: buttonActorPressed,
+              SizedBox(
+                height: 50,
+                child: Align(
+                  alignment: Alignment.bottomLeft,
+                  child: CheckboxListTile(
+                    title: const Text("원하는 배우만 골라 보기"),
+                    value: buttonActorPressed,
+                    activeColor: Colors.orangeAccent,
+                    onChanged: (bool? value) {
+                      buttonActorPressed = value ?? false;
+                      getButtonState();
+                    },
+                    controlAffinity: ListTileControlAffinity.leading,  //  <-- leading Checkbox
+                    selected: buttonActorPressed,
+                  ),
                 ),
               ),
-              const SizedBox(height: 10),
-              Expanded(
-                child: ValueListenableBuilder<List<String>>(
-                  valueListenable: _selectedEvents,
-                  builder: (context, value, _) {
-                    return ListView.builder(
-                      itemCount: value.length,
-                      itemBuilder: (context, index) {
-                        return Dismissible(
-                          key: UniqueKey(),
-                          background: Container(color: Colors.red,),
-                          direction: DismissDirection.startToEnd,
-                          onDismissed: (direction){//값을 완전히 삭제
-                            setState(() {
-                              final dateIndex = addedDate.indexOf(_selectedDay!.toIso8601String());
-                              final titleIndex = addedTitle.indexOf(value[index]);
-                              if (dateIndex != -1 && titleIndex != -1 && addedDate.contains(_selectedDay!.toIso8601String()) && addedTitle.contains(value[index])) {
-                                addedDate.removeAt(dateIndex);
-                                addedTitle.removeAt(titleIndex);
+              Container(
+                height: MediaQuery.of(context).size.height * 0.3,
+                child: Expanded(
+                  child: ValueListenableBuilder<List<String>>(
+                    valueListenable: _selectedEvents,
+                    builder: (context, value, _) {
+                      return ListView.builder(
+                        itemCount: value.length,
+                        itemBuilder: (context, index) {
+                          return Dismissible(
+                            key: UniqueKey(),
+                            background: Container(color: Colors.red,),
+                            direction: DismissDirection.startToEnd,
+                            onDismissed: (direction){//값을 완전히 삭제
+                              setState(() {
+                                final dateIndex = addedDate.indexOf(_selectedDay!.toIso8601String());
+                                final titleIndex = addedTitle.indexOf(value[index]);
+                                if (dateIndex != -1 && titleIndex != -1 && addedDate.contains(_selectedDay!.toIso8601String()) && addedTitle.contains(value[index])) {
+                                  addedDate.removeAt(dateIndex);
+                                  addedTitle.removeAt(titleIndex);
 
-                                prefs.setStringList('userAddedDate', addedDate);
-                                prefs.setStringList('userAddedTitle', addedTitle);
+                                  prefs.setStringList('userAddedDate', addedDate);
+                                  prefs.setStringList('userAddedTitle', addedTitle);
 
-                                final eventList = events[_selectedDay!];
-                                if (eventList != null) {
-                                  eventList.remove(value[index]);
-                                  if (eventList.isEmpty) {
-                                    events.remove(_selectedDay!);
-                                  } else {
-                                    events[_selectedDay!] = eventList;
+                                  final eventList = events[_selectedDay!];
+                                  if (eventList != null) {
+                                    eventList.remove(value[index]);
+                                    if (eventList.isEmpty) {
+                                      events.remove(_selectedDay!);
+                                    } else {
+                                      events[_selectedDay!] = eventList;
+                                    }
                                   }
+                                  _selectedEvents.value = _getEventsForDay(_selectedDay!);
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(content: Text('${value[index]}이(가) 삭제되었습니다.')),
+                                  );
+                                } else{
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(content: Text('존재하는 뮤지컬 일정은 삭제할 수 없습니다.')),
+                                  );
                                 }
-                                _selectedEvents.value = _getEventsForDay(_selectedDay!);
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text('${value[index]}이(가) 삭제되었습니다.')),
-                                );
-                              } else{
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text('존재하는 뮤지컬 일정은 삭제할 수 없습니다.')),
-                                );
-                              }
-                            });
-                          },
-                          child: ListTile(
+                              });
+                            },
+                            child: ListTile(
                               title: Text(value[index]),
-                          ),
-                        );
-                      },
-                    );
-                  },
+                            ),
+                          );
+                        },
+                      );
+                    },
+                  ),
                 ),
               ),
             ],
+          ),
         ),
       ),
     );
