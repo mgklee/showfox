@@ -48,19 +48,23 @@ class _Tab3State extends State<Tab3> {
     List<Musical>musicalsForEvent = await loadMusicalData();
     Map<DateTime, List<String>> newEvents = {};
     for(var musical in musicalsForEvent) {
-      DateTime startDate = changeStringToDateTime(musical.firstDate);
-      DateTime endDate = changeStringToDateTime(musical.lastDate);
+      DateTime firstBookDate = changeStringToDateTime(musical.firstTicketOpen.split(' ')[0]);
+      DateTime secondBookDate = changeStringToDateTime(musical.secondTicketOpen.split(' ')[0]);
+      String firstBookHour = musical.firstTicketOpen.split(' ')[1];
+      String secondBookHour = musical.secondTicketOpen.split(' ')[1];
+      String firstTerm = musical.firstTerm;
+      String secondTerm = musical.secondTerm;
       String title = musical.title;
 
-      if (!newEvents.containsKey(startDate)) {
-        newEvents[startDate] = [];
+      if (!newEvents.containsKey(firstBookDate)) {
+        newEvents[firstBookDate] = [];
       }
-      newEvents[startDate]!.add("[$title] 시작일");
+      newEvents[firstBookDate]!.add("[$title] $firstBookHour 1차 티켓 오픈 \n($firstTerm)");
 
-      if (!newEvents.containsKey(endDate)) {
-        newEvents[endDate] = [];
+      if (!newEvents.containsKey(secondBookDate)) {
+        newEvents[secondBookDate] = [];
       }
-      newEvents[endDate]!.add("[$title] 마감일");
+      newEvents[secondBookDate]!.add("[$title] $secondBookHour 2차 티켓 오픈 ($secondTerm)");
     }
     for (int i = 0;i<min(addedTitle.length, addedDate.length);i++){
       if (!newEvents.containsKey(DateTime.parse(addedDate[i]))){
@@ -454,7 +458,7 @@ class _Tab3State extends State<Tab3> {
                     // 찜한 뮤지컬
                     Expanded(
                       child: Padding(
-                        padding: const EdgeInsets.only(left: 16.0), // 왼쪽 여백 추가
+                        padding: const EdgeInsets.only(left: 16.0),
                         child: Row(
                           children: [
                             InkWell(
@@ -483,11 +487,11 @@ class _Tab3State extends State<Tab3> {
                         ),
                       ),
                     ),
-                    const SizedBox(width: 16), // 간격
+                    const SizedBox(width: 16),
                     // 찜한 배우
                     Expanded(
                       child: Padding(
-                        padding: const EdgeInsets.only(left: 16.0), // 왼쪽 여백 추가
+                        padding: const EdgeInsets.only(left: 16.0),
                         child: Row(
                           children: [
                             InkWell(
@@ -538,7 +542,7 @@ class _Tab3State extends State<Tab3> {
                               final titleIndex = addedTitle.indexOf(valueToRemove);
                               if (dateIndex != -1 && titleIndex != -1 && addedDate.contains(_selectedDay!.toIso8601String()) && addedTitle.contains(value[index])) {
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text('${value[index]}이(가) 삭제되었습니다.')),
+                                  SnackBar(content: Text('${value[index]} 삭제됨')),
                                 );
 
                                 final musicalAndActorEventList = musicalAndActorEvents[_selectedDay!];
