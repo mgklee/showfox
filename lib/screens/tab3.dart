@@ -58,12 +58,12 @@ class _Tab3State extends State<Tab3> {
       if (!newEvents.containsKey(firstBookDate)) {
         newEvents[firstBookDate] = [];
       }
-      newEvents[firstBookDate]!.add("[$title] $firstBookHour 1차 티켓 오픈 \n($firstTerm)");
+      newEvents[firstBookDate]!.add("[$title] $firstBookHour 1차 티켓 오픈\n($firstTerm)");
 
       if (!newEvents.containsKey(secondBookDate)) {
         newEvents[secondBookDate] = [];
       }
-      newEvents[secondBookDate]!.add("[$title] $secondBookHour 2차 티켓 오픈 ($secondTerm)");
+      newEvents[secondBookDate]!.add("[$title] $secondBookHour 2차 티켓 오픈\n($secondTerm)");
     }
     for (int i = 0;i<min(addedTitle.length, addedDate.length);i++){
       if (!newEvents.containsKey(DateTime.parse(addedDate[i]))){
@@ -391,10 +391,11 @@ class _Tab3State extends State<Tab3> {
             children: [
               SizedBox(
                 height: MediaQuery.of(context).size.height * 0.51,
-                child: Flexible(
-                  flex: 5,
+                // child: Flexible(
+                //   flex: 5,
                   child: TableCalendar(
                     locale: 'ko_KR',
+                    shouldFillViewport: true,
                     firstDay: DateTime.utc(2021, 10, 16),
                     lastDay: DateTime.utc(2030, 3, 14),
                     focusedDay: _focusedDay,
@@ -447,7 +448,7 @@ class _Tab3State extends State<Tab3> {
                       },
                     ),
                   ),
-                ),
+                // ),
               ),
               SizedBox(
                 height: 50,
@@ -480,7 +481,7 @@ class _Tab3State extends State<Tab3> {
                                   getButtonState();
                                 });
                               },
-                              child: const Text("찜한 뮤지컬"),
+                              child: const Text("찜한 뮤지컬만 보기"),
                             ),
                           ],
                         ),
@@ -513,7 +514,7 @@ class _Tab3State extends State<Tab3> {
                                   getButtonState();
                                 });
                               },
-                              child: const Text("찜한 배우"),
+                              child: const Text("찜한 배우만 보기"),
                             ),
                           ],
                         ),
