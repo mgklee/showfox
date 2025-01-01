@@ -39,7 +39,7 @@ class _Tab2State extends State<Tab2> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SizedBox(
-          width: 80,
+          width: 60,
           child: Text(
             label,
             style: const TextStyle(fontWeight: FontWeight.bold),
@@ -58,7 +58,7 @@ class _Tab2State extends State<Tab2> {
 
     for (int i = 0; i < musical.actors.length; i++) {
       Iterable<Actor> match = widget.actors.where(
-              (element) => element.name == musical.actors[i]
+        (element) => element.name == musical.actors[i]
       );
 
       if (match.isEmpty) {
@@ -71,7 +71,10 @@ class _Tab2State extends State<Tab2> {
                 Navigator.of(context).pop();
                 _showActorDetails(context, actor);
               },
-              child: Text(musical.actors[i]),
+              child: Text(
+                musical.actors[i],
+                style: const TextStyle(color: Colors.deepPurple),
+              ),
             ),
           );
         }
@@ -88,10 +91,7 @@ class _Tab2State extends State<Tab2> {
         return AlertDialog(
           title: Text(
             "${musical.title} 상세정보",
-            style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold
-            ),
+            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
@@ -106,12 +106,6 @@ class _Tab2State extends State<Tab2> {
             ],
           ),
           actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(); // Close the dialog
-              },
-              child: const Text('닫기'),
-            ),
             TextButton(
               onPressed: () {
                 _launchURL(musical.map);
@@ -149,7 +143,7 @@ class _Tab2State extends State<Tab2> {
 
     for (int i = 0; i < actor.musicals.length; i++) {
       Iterable<Musical> match = widget.musicals.where(
-              (element) => element.title == actor.musicals[i]
+        (element) => element.title == actor.musicals[i]
       );
 
       if (match.isEmpty) {
@@ -162,7 +156,10 @@ class _Tab2State extends State<Tab2> {
                 Navigator.of(context).pop();
                 _showMusicalDetails(context, musical);
               },
-              child: Text(actor.musicals[i]),
+              child: Text(
+                actor.musicals[i],
+                style: const TextStyle(color: Colors.deepPurple),
+              ),
             ),
           );
         }
@@ -185,7 +182,7 @@ class _Tab2State extends State<Tab2> {
                 style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
               content: SizedBox(
-                width: MediaQuery.of(context).size.width * 0.8, // 80% of screen width
+                width: MediaQuery.of(context).size.width * 0.9, // 90% of screen width
                 child: SingleChildScrollView(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
@@ -246,14 +243,6 @@ class _Tab2State extends State<Tab2> {
                   ),
                 ),
               ),
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    Navigator.of(context).pop(); // Close the dialog
-                  },
-                  child: const Text('닫기'),
-                ),
-              ],
             );
           },
         );
@@ -264,7 +253,8 @@ class _Tab2State extends State<Tab2> {
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
-    const double itemWidth = 150;
+    final screenHeight = MediaQuery.of(context).size.height;
+    const double itemWidth = 120;
     final crossAxisCount = ((screenWidth - 40) / itemWidth).floor();
 
     return Scaffold(
@@ -272,13 +262,13 @@ class _Tab2State extends State<Tab2> {
         physics: const BouncingScrollPhysics(), // Enables smooth scrolling
         slivers: [
           SliverPadding(
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.all(15),
             sliver: SliverGrid(
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: crossAxisCount, // Dynamic number of items per row
-                crossAxisSpacing: 10, // Horizontal spacing between items
-                mainAxisSpacing: 20, // Vertical spacing between items
-                childAspectRatio: 0.9,
+                // crossAxisSpacing: 10, // Horizontal spacing between items
+                // mainAxisSpacing: 20, // Vertical spacing between items
+                childAspectRatio: 0.75,
               ),
               delegate: SliverChildBuilderDelegate(
                 (BuildContext context, int index) {
@@ -287,53 +277,57 @@ class _Tab2State extends State<Tab2> {
                   return Column(
                     children: [
                       const SizedBox(height: 20),
-                      GestureDetector(
-                        onTap: () => _showActorDetails(context, actor),
-                        child: Stack(
-                          children: [
-                            ClipOval(
-                              child: Image.network(
-                                actor.profilePicture,
-                                width: 100,
-                                height: 100,
-                                fit: BoxFit.cover,
-                              ),
-                            ),
-                            Positioned(
-                              top: 0,
-                              right: 0,
-                              child: GestureDetector(
-                                onTap: () {
-                                  setState(() {
-                                    if (isSaved) {
-                                      savedActors.remove(actor.name);
-                                    } else {
-                                      savedActors.add(actor.name);
-                                    }
-                                    prefs.setStringList('savedActors', savedActors);
-
-                                    ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        width: 300,
-                                        content: Text(isSaved ? '저장 해제됨' : '저장됨'),
-                                        duration: const Duration(seconds: 1), // Short duration for quick response
-                                        behavior: SnackBarBehavior.floating, // Makes it appear above other content
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(8),
-                                        ),
-                                      ),
-                                    );
-                                  });
-                                },
-                                child: Icon(
-                                  isSaved ? Icons.favorite : Icons.favorite_border,
-                                  color: isSaved ? Colors.red : Colors.grey,
-                                  size: 28,
+                      SizedBox(
+                        width: 100,
+                        height: 100,
+                        child: GestureDetector(
+                          onTap: () => _showActorDetails(context, actor),
+                          child: Stack(
+                            children: [
+                              ClipOval(
+                                child: Image.network(
+                                  actor.profilePicture,
+                                  width: 100,
+                                  height: 100,
+                                  fit: BoxFit.cover,
                                 ),
                               ),
-                            ),
-                          ],
+                              Positioned(
+                                top: 0,
+                                right: 0,
+                                child: GestureDetector(
+                                  onTap: () {
+                                    setState(() {
+                                      if (isSaved) {
+                                        savedActors.remove(actor.name);
+                                      } else {
+                                        savedActors.add(actor.name);
+                                      }
+                                      prefs.setStringList('savedActors', savedActors);
+
+                                      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(
+                                          width: 300,
+                                          content: Text(isSaved ? '저장 해제됨' : '저장됨'),
+                                          duration: const Duration(seconds: 1), // Short duration for quick response
+                                          behavior: SnackBarBehavior.floating, // Makes it appear above other content
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(8),
+                                          ),
+                                        ),
+                                      );
+                                    });
+                                  },
+                                  child: Icon(
+                                    isSaved ? Icons.favorite : Icons.favorite_border,
+                                    color: isSaved ? Colors.red : Colors.grey,
+                                    size: 28,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                       const SizedBox(height: 10),
