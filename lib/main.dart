@@ -2,11 +2,11 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/date_symbol_data_local.dart';
-import 'screens/tab1.dart';
-import 'screens/tab2.dart';
-import 'screens/tab3.dart';
-import 'musical.dart';
+import 'tabs/tab1.dart';
+import 'tabs/tab2.dart';
+import 'tabs/tab3.dart';
 import 'actor.dart';
+import 'musical.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized(); // Ensures async operations work before runApp

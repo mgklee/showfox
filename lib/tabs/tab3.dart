@@ -56,7 +56,7 @@ class _Tab3State extends State<Tab3> {
     }
 
     for (int i = 0; i < min(addedTitle.length, addedDate.length); i++) {
-      if (!newEvents.containsKey(DateTime.parse(addedDate[i]))){
+      if (!newEvents.containsKey(DateTime.parse(addedDate[i]))) {
         newEvents[DateTime.parse(addedDate[i])] = [];
       }
       newEvents[DateTime.parse(addedDate[i])]!.add(addedTitle[i]);
@@ -105,7 +105,7 @@ class _Tab3State extends State<Tab3> {
     }
 
     for (int i = 0; i < min(addedTitle.length, addedDate.length); i++) {
-      if (!newEvents.containsKey(DateTime.parse(addedDate[i]))){
+      if (!newEvents.containsKey(DateTime.parse(addedDate[i]))) {
         newEvents[DateTime.parse(addedDate[i])] = [];
       }
       newEvents[DateTime.parse(addedDate[i])]!.add(addedTitle[i]);
@@ -157,7 +157,7 @@ class _Tab3State extends State<Tab3> {
     }
 
     for (int i = 0; i < min(addedTitle.length, addedDate.length); i++) {
-      if (!newEvents.containsKey(DateTime.parse(addedDate[i]))){
+      if (!newEvents.containsKey(DateTime.parse(addedDate[i]))) {
         newEvents[DateTime.parse(addedDate[i])] = [];
       }
       newEvents[DateTime.parse(addedDate[i])]!.add(addedTitle[i]);
@@ -241,9 +241,9 @@ class _Tab3State extends State<Tab3> {
     super.initState();
     _selectedDay = _focusedDay;
     _selectedEvents = ValueNotifier(_getEventsForDay(_selectedDay!));
-    getPref().then((_){
-      getUserAddedEvent().then((_){
-        getEventFromFavorite().then((_){
+    getPref().then((_) {
+      getUserAddedEvent().then((_) {
+        getEventFromFavorite().then((_) {
           makeEventFromBothMusicalAndActor();
           events = allEvents;
         });
@@ -257,13 +257,13 @@ class _Tab3State extends State<Tab3> {
     super.dispose();
   }
 
-  DateTime addZ(DateTime dateNotUTC){
-    String dateStringWithZ = dateNotUTC.toIso8601String() + "Z";
+  DateTime addZ(DateTime dateNotUTC) {
+    String dateStringWithZ = "${dateNotUTC.toIso8601String()}Z";
     DateTime dateWithZ = DateTime.parse(dateStringWithZ);
     return dateWithZ;
   }
 
-  DateTime changeStringToDateTime(String date){
+  DateTime changeStringToDateTime(String date) {
     DateFormat format = DateFormat("yyyy.MM.dd");
     DateTime day = format.parse(date);
     return addZ(day);
@@ -314,9 +314,9 @@ class _Tab3State extends State<Tab3> {
     }
   }
 
-  void getButtonState(){
-    if (buttonMusicalPressed){
-      if(buttonActorPressed){
+  void getButtonState() {
+    if (buttonMusicalPressed) {
+      if(buttonActorPressed) {
         setState(() {
           events = musicalAndActorEvents;
           _selectedEvents.value =
@@ -332,7 +332,7 @@ class _Tab3State extends State<Tab3> {
       }
     }
     else {
-      if(buttonActorPressed){
+      if(buttonActorPressed) {
         setState(() {
           events = actorEvents;
           _selectedEvents.value =
@@ -523,7 +523,7 @@ class _Tab3State extends State<Tab3> {
                   ],
                 ),
               ),
-              Container(
+              SizedBox(
                 height: MediaQuery.of(context).size.height * 0.2,
                 child: Expanded(
                   child: ValueListenableBuilder<List<String>>(
@@ -536,7 +536,7 @@ class _Tab3State extends State<Tab3> {
                             key: UniqueKey(),
                             background: Container(color: Colors.red),
                             direction: DismissDirection.startToEnd,
-                            onDismissed: (direction){
+                            onDismissed: (direction) {
                               var valueToRemove = value[index];
                               final dateIndex = addedDate.indexOf(_selectedDay!.toIso8601String());
                               final titleIndex = addedTitle.indexOf(valueToRemove);
